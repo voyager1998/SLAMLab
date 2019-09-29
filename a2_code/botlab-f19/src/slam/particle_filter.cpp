@@ -37,8 +37,11 @@ pose_xyt_t ParticleFilter::updateFilter(const pose_xyt_t& odometry,
 
     if (hasRobotMoved) {
         auto prior = resamplePosteriorDistribution();
+        // printf("size of prior:     %ld\n", prior.size());
         auto proposal = computeProposalDistribution(prior);
+        // printf("size of proposal:  %ld\n", proposal.size());
         posterior_ = computeNormalizedPosterior(proposal, laser, map);
+        // printf("size of posterior: %ld\n", posterior_.size());
         posteriorPose_ = estimatePosteriorPose(posterior_);
     }
 
@@ -92,9 +95,15 @@ std::vector<particle_t> ParticleFilter::computeNormalizedPosterior(const std::ve
     std::vector<particle_t> posterior;
     for (auto i : proposal) {
         particle_t temp;
-        temp = i;
+        temp.pose.x = i.pose.x;
+        temp.pose.y = i.pose.y;
+        temp.pose.theta = i.pose.theta;
+        temp.parent_pose.x = i.parent_pose.x;
+        temp.parent_pose.y = i.parent_pose.y;
+        temp.parent_pose.theta = i.parent_pose.theta;
+
         temp.weight = sensorModel_.likelihood(i, laser, map);
-        posterior_.push_back(temp);
+        posterior.push_back(temp);
     }
     return posterior;
 }
