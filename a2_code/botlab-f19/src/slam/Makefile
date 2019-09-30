@@ -26,17 +26,26 @@ LIBMAPPING_OBJS = occupancy_grid.o
 
 BIN_SLAM = $(BIN_PATH)/slam
 
+BIN_TEST = $(BIN_PATH)/test
+
 ALL = $(LIB_MAPPING) $(BIN_SLAM)
+TEST = $(BIN_TEST)
 
 all: $(ALL)
 
-$(BIN_SLAM): slam_main.o moving_laser_scan.o mapping.o slam.o action_model.o particle_filter.o sensor_model.o $(LIBDEPS)
+test: $(TEST)
+
+$(BIN_SLAM): slam_main.o moving_laser_scan.o mapping.o slam.o action_model.o particle_filter.o sensor_model.o occupancy_grid_utils.o $(LIBDEPS)
 	@echo "    $@"
 	@$(CXX) -o $@ $^ $(LDFLAGS) $(CXXFLAGS)
 
 $(LIB_MAPPING): $(LIBMAPPING_OBJS)
 	@echo "    $@"
 	@ar rc $@ $^
+
+$(BIN_TEST): occupancy_grid_utils.o $(LIBDEPS)
+	@echo "    $@"
+	@$(CXX) -o $@ $^ $(LDFLAGS) $(CXXFLAGS)
 
 clean:
 	@rm -f *.o *~ *.a

@@ -21,7 +21,11 @@ void Mapping::updateMap(const lidar_t& scan, const pose_xyt_t& pose, OccupancyGr
     }
     
     MovingLaserScan movingScan(scan, previousPose_, pose);
-    
+    for(auto i = movingScan.begin(); i < movingScan.end(); i++)
+    {
+        updateEndpoint(*i, map);
+        updateRay(*i, map);
+    }
     //////////////// TODO: Implement your occupancy grid algorithm here ///////////////////////
 }
 
@@ -29,22 +33,29 @@ void Mapping::updateMap(const lidar_t& scan, const pose_xyt_t& pose, OccupancyGr
 void Mapping::updateEndpoint(const adjusted_ray_t& ray, OccupancyGrid& map)
 {
     //////////////// TODO: Implement this function //////////////////
+    coordinate c = coordinate_convert_.get_end_point_coordinate(ray, map);
+    increaseCellOdds(c.x, c.y, map);
 }
 
 
 void Mapping::updateRay(const adjusted_ray_t& ray, OccupancyGrid& map)
 {
     //////////////// TODO: Implement this function //////////////////
+    ray_coordinates rc = coordinate_convert_.get_ray_coordinates(ray, map);
+    for(auto c : rc)
+        decreaseCellOdds(c.x, c.y, map);
 }
 
 
 void Mapping::decreaseCellOdds(int x, int y, OccupancyGrid& map)
 {
     //////////////// TODO: Implement this function //////////////////
+    map.setLogOdds(x, y, map.logOdds(x, y) - kMissOdds_);
 }
 
 
 void Mapping::increaseCellOdds(int x, int y, OccupancyGrid& map)
 {
     //////////////// TODO: Implement this function //////////////////
+    map.setLogOdds(x, y, map.logOdds(x, y) + kHitOdds_);
 }

@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <vector>
-
 typedef int8_t CellOdds;   ///< Type used to represent the data in a cell
 
 /**
