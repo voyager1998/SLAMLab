@@ -2,10 +2,15 @@
 #define PLANNING_OBSTACLE_DISTANCE_GRID_HPP
 
 #include <common/point.hpp>
+#include <lcmtypes/pose_xyt_t.hpp>
 #include <vector>
 
 class OccupancyGrid;
 
+struct coordinate {
+    int x;
+    int y;
+};
 
 /**
 * ObstacleDistanceGrid stores the distance to the nearest obstacle for each cell in the occupancy grid.
@@ -15,10 +20,8 @@ class OccupancyGrid;
 * 
 * To update the grid, simply pass an OccupancyGrid to the setDistances method.
 */
-class ObstacleDistanceGrid
-{
+class ObstacleDistanceGrid {
 public:
-    
     /**
     * Default constructor for ObstacleDistanceGrid.
     * 
@@ -26,25 +29,27 @@ public:
     * The global origin is (0,0).
     */
     ObstacleDistanceGrid(void);
-    
+
     // Accessors for the properties of the grid
-    int   widthInCells (void) const { return width_; }
+    int widthInCells(void) const { return width_; }
     float widthInMeters(void) const { return width_ * metersPerCell_; }
-    
-    int   heightInCells (void) const { return height_; }
+
+    int heightInCells(void) const { return height_; }
     float heightInMeters(void) const { return height_ * metersPerCell_; }
-    
+
     float metersPerCell(void) const { return metersPerCell_; }
     float cellsPerMeter(void) const { return cellsPerMeter_; }
-    
+
     Point<float> originInGlobalFrame(void) const { return globalOrigin_; }
-    
+
+    coordinate cellIndexLookup(const pose_xyt_t& p) const;
+
     /**
     * setDistances sets the obstacle distances stored in the grid based on the provided occupancy grid map of the
     * environment.
     */
     void setDistances(const OccupancyGrid& map);
-    
+
     /**
     * isCellInGrid checks to see if the specified cell is within the boundary of the ObstacleDistanceGrid.
     * 
@@ -57,7 +62,7 @@ public:
     * \return   True if the cell is in the grid boundary as specified above.
     */
     bool isCellInGrid(int x, int y) const;
-    
+
     /**
     * operator() provides unchecked access to the cell located at (x,y). If the cell isn't contained in the grid,
     * expect fireworks or a slow, ponderous death.
@@ -68,25 +73,24 @@ public:
     */
     float operator()(int x, int y) const { return cells_[cellIndex(x, y)]; }
     float& operator()(int x, int y) { return cells_[cellIndex(x, y)]; }
-    
+
 private:
-    
-    std::vector<float> cells_;          ///< The actual grid -- stored in row-major order
-    
-    int width_;                 ///< Width of the grid in cells
-    int height_;                ///< Height of the grid in cells
-    float metersPerCell_;       ///< Side length of a cell
-    float cellsPerMeter_;       ///< Number of cells in a meter
-    
-    Point<float> globalOrigin_;         ///< Origin of the grid in global coordinates
+    std::vector<float> cells_;  ///< The actual grid -- stored in row-major order
+
+    int width_;            ///< Width of the grid in cells
+    int height_;           ///< Height of the grid in cells
+    float metersPerCell_;  ///< Side length of a cell
+    float cellsPerMeter_;  ///< Number of cells in a meter
+
+    Point<float> globalOrigin_;  ///< Origin of the grid in global coordinates
 
     void resetGrid(const OccupancyGrid& map);
-    
+
     // Convert between cells and the underlying vector index
-    int cellIndex(int x, int y) const { return y*width_ + x; }
-    
+    int cellIndex(int x, int y) const { return y * width_ + x; }
+
     // Allow private write-access to cells
     float& distance(int x, int y) { return cells_[cellIndex(x, y)]; }
 };
 
-#endif // PLANNING_OBSTACLE_DISTANCE_GRID_HPP
+#endif  // PLANNING_OBSTACLE_DISTANCE_GRID_HPP
