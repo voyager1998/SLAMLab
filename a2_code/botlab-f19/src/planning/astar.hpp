@@ -3,6 +3,12 @@
 
 #include <lcmtypes/robot_path_t.hpp>
 #include <lcmtypes/pose_xyt_t.hpp>
+#include <planning/obstacle_distance_grid.hpp>
+
+struct node{
+    coordinate coor;
+    float fscore;
+};
 
 class ObstacleDistanceGrid;
 
@@ -39,4 +45,8 @@ robot_path_t search_for_path(pose_xyt_t start,
                              const ObstacleDistanceGrid& distances,
                              const SearchParams& params);
 
-#endif // PLANNING_ASTAR_HPP
+float heuristic(pose_xyt_t goal, pose_xyt_t p);
+
+robot_path_t reconstruct_path(std::vector<coordinate> camefrom, node curr_node);
+
+#endif  // PLANNING_ASTAR_HPP
