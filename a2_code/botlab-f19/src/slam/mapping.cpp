@@ -50,12 +50,20 @@ void Mapping::updateRay(const adjusted_ray_t& ray, OccupancyGrid& map)
 void Mapping::decreaseCellOdds(int x, int y, OccupancyGrid& map)
 {
     //////////////// TODO: Implement this function //////////////////
-    map.setLogOdds(x, y, map.logOdds(x, y) - kMissOdds_);
+    int cur_odds = (int)map.logOdds(x, y);
+    if(cur_odds - (int)kMissOdds_ < -127)
+        map.setLogOdds(x, y, -127);
+    else    
+        map.setLogOdds(x, y, cur_odds - kMissOdds_);
 }
 
 
 void Mapping::increaseCellOdds(int x, int y, OccupancyGrid& map)
 {
     //////////////// TODO: Implement this function //////////////////
-    map.setLogOdds(x, y, map.logOdds(x, y) + kHitOdds_);
+    int cur_odds = (int)map.logOdds(x, y);
+    if(cur_odds + (int)kHitOdds_ > 127)
+        map.setLogOdds(x, y, 127);
+    else
+        map.setLogOdds(x, y, map.logOdds(x, y) + kHitOdds_);
 }

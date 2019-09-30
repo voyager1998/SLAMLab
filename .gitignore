@@ -1,4 +1,5 @@
 *.[oa]
+*.jlp
 .vscode/
 lcmtypes/*.hpp
 a2_code/botlab-f19/src/lcmtypes/*.hpp
