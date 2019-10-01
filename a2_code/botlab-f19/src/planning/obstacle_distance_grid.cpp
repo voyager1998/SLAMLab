@@ -11,6 +11,15 @@ ObstacleDistanceGrid::ObstacleDistanceGrid(void)
 }
 
 
+coordinate ObstacleDistanceGrid::poseToCoor(pose_xyt_t pos) const
+{
+    coordinate coor;
+    coor.x = (int)floor((pos.x - globalOrigin_.x) / metersPerCell_);
+    coor.y = (int)floor((pos.y - globalOrigin_.y) / metersPerCell_);
+    return coor;
+}
+
+
 void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
 {
     resetGrid(map);
