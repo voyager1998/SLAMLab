@@ -24,19 +24,17 @@ struct cmp
 };
 
 
-robot_path_t reconstruct_path(map<coordinate, coordinate> cameFrom, coordinate current)
+robot_path_t reconstruct_path(map<coordinate, coordinate> cameFrom, coordinate current, const ObstacleDistanceGrid& distances)
 {
     robot_path_t total_path;
-    // total_path.utime = current.utime;
-    // total_path.path.push_back(current);
-    // total_path.path_length = total_path.path.size();
-    // while (cameFrom.find(current) != cameFrom.end())
-    // {
-    //     current = cameFrom[current];
-    //     total_path.utime = current.utime;
-    //     total_path.path.insert(total_path.path.begin(), current);
-    //     total_path.path_length = total_path.path.size();
-    // }
+    total_path.path.push_back(distances.coorTopose(current));
+    total_path.path_length = total_path.path.size();
+    while (cameFrom.find(current) != cameFrom.end())
+    {
+        current = cameFrom[current];
+        total_path.path.insert(total_path.path.begin(), distances.coorTopose(current));
+        total_path.path_length = total_path.path.size();
+    }
     return total_path;
 }
 

@@ -20,6 +20,17 @@ coordinate ObstacleDistanceGrid::poseToCoor(pose_xyt_t pos) const
 }
 
 
+pose_xyt_t ObstacleDistanceGrid::coorTopose(coordinate current) const
+{
+    pose_xyt_t pos;
+    // coor.x = (int)floor((pos.x - globalOrigin_.x) / metersPerCell_);
+    // coor.y = (int)floor((pos.y - globalOrigin_.y) / metersPerCell_);
+    pos.x = (float)(current.x * metersPerCell_ + globalOrigin_.x);
+    pos.y = (float)(current.y * metersPerCell_ + globalOrigin_.y);
+    return pos;
+}
+
+
 void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
 {
     resetGrid(map);
