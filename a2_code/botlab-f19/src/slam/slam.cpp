@@ -238,7 +238,7 @@ void OccupancyGridSLAM::initializePosesIfNeeded(void)
         currentPose_.utime  = currentScan_.times.back();
         haveInitializedPoses_ = true;
         
-        filter_.initializeFilterAtPose(previousPose_);
+        filter_.initializeFilterAtPose(previousPose_, map_);
     }
     
     assert(haveInitializedPoses_);

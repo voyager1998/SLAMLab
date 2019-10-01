@@ -43,8 +43,8 @@ public:
     *
     * \param    pose            Initial pose of the robot
     */
-    void initializeFilterAtPose(const pose_xyt_t& pose);
-    
+    void initializeFilterAtPose(const pose_xyt_t& pose, const OccupancyGrid& map);
+
     /**
     * updateFilter increments the state estimated by the particle filter. The filter update uses the most recent
     * odometry estimate and laser scan along with the occupancy grid map to estimate the new pose of the robot.
