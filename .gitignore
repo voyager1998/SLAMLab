@@ -3,3 +3,6 @@
 */.vscode/*
 *.jlp
 *.vscode*
+a2_code/botlab-f19/src/lcmtypes/*.hpp
+a2_code/botlab-f19/src/lcmtypes/*.py
+
