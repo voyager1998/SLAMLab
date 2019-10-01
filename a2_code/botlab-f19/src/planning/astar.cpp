@@ -106,7 +106,7 @@ robot_path_t search_for_path(pose_xyt_t start,
             {
                 continue;
             }
-            float tentative_gScore = gScore[current];
+            float tentative_gScore = gScore[current] + heuristic(neighbor, current);
             if (gScore.find(neighbor) == gScore.end()) 
             {
                 gScore[neighbor] = numeric_limits<float>::infinity();
