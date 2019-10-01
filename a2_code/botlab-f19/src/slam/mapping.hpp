@@ -3,6 +3,7 @@
 
 #include <lcmtypes/pose_xyt_t.hpp>
 #include <slam/moving_laser_scan.hpp>
+#include <slam/occupancy_grid_utils.hpp>
 #include <common/point.hpp>
 #include <cstdint>
 #include <set>
@@ -42,6 +43,7 @@ private:
     const int8_t kMissOdds_;
     bool initialized_;
     pose_xyt_t previousPose_;
+    coordinate_convert coordinate_convert_;
 
     // Update the cell that is on the end point of the ray.
     void updateEndpoint   (const adjusted_ray_t& ray, OccupancyGrid& map);
