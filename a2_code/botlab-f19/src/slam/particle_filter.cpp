@@ -5,6 +5,13 @@
 #include <slam/particle_filter.hpp>
 
 using namespace std;
+int sampleFromWeightBar(float sample, std::vector<float> weight_bar) {
+    int index = 0;
+    while(sample > weight_bar[index]){
+        index++;
+    }
+    return index;
+}
 
 ParticleFilter::ParticleFilter(int numParticles)
     : kNumParticles_(numParticles) {
@@ -13,7 +20,7 @@ ParticleFilter::ParticleFilter(int numParticles)
 }
 
 void ParticleFilter::initializeFilterAtPose(const pose_xyt_t& pose, const OccupancyGrid& map) {
-    ///////////// TODO: Implement your method for initializing the particles in the particle filter /////////////////
+    // TODO: Implement your method for initializing the particles in the particle filter
     float map_width = map.widthInMeters();
     float map_height = map.heightInMeters();
     srand(time(NULL));
@@ -65,15 +72,24 @@ std::vector<particle_t> ParticleFilter::resamplePosteriorDistribution(void) {
     //////////// TODO: Implement your algorithm for resampling from the posterior distribution ///////////////////
     std::vector<particle_t> prior;
     prior.resize(kNumParticles_);
+
+    std::vector<float> weight_bar;
+    float sum = 0.0;
+    for (int i = 0; i < kNumParticles_; i++) {
+        sum += posterior_[i].weight;
+        weight_bar.push_back(sum);
+    }
+    if (abs(sum - 1.0) > 0.01) std::cout << "sum not equal to 1" << std::endl;
+
     srand(time(NULL));
     random_device rd;
-    normal_distribution<float> randomXY(0.0, 0.1);
-    normal_distribution<float> randomTheta(0.0, M_PI / 18.0);
+    uniform_real_distribution<float> random(0.0, sum);
     for (int i = 0; i < kNumParticles_; i++) {
-        prior[i].pose.x = posteriorPose_.x + randomXY(rd);
-        prior[i].pose.y = posteriorPose_.y + randomXY(rd);
-        prior[i].pose.theta = posteriorPose_.theta + randomTheta(rd);
-        prior[i].weight = 1.0 / (float)kNumParticles_;  // TODO
+        float sample = random(rd);
+        int index = sampleFromWeightBar(sample, weight_bar);
+        particle_t temp = posterior_[index];
+        temp.weight = 1.0 / (float)kNumParticles_;
+        prior[i] = temp;
     }
     return prior;
 }
@@ -94,14 +110,13 @@ std::vector<particle_t> ParticleFilter::computeNormalizedPosterior(const std::ve
     ///////////       particles in the proposal distribution
     std::vector<particle_t> posterior;
     for (auto i : proposal) {
-        particle_t temp;
-        temp.pose.x = i.pose.x;
-        temp.pose.y = i.pose.y;
-        temp.pose.theta = i.pose.theta;
-        temp.parent_pose.x = i.parent_pose.x;
-        temp.parent_pose.y = i.parent_pose.y;
-        temp.parent_pose.theta = i.parent_pose.theta;
-
+        particle_t temp = i;
+        // temp.pose.x = i.pose.x;
+        // temp.pose.y = i.pose.y;
+        // temp.pose.theta = i.pose.theta;
+        // temp.parent_pose.x = i.parent_pose.x;
+        // temp.parent_pose.y = i.parent_pose.y;
+        // temp.parent_pose.theta = i.parent_pose.theta;
         temp.weight = sensorModel_.likelihood(i, laser, map);
         posterior.push_back(temp);
     }
