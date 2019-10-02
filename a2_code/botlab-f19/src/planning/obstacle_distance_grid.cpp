@@ -39,8 +39,8 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
     
     ///////////// TODO: Implement an algorithm to mark the distance to the nearest obstacle for every cell in the map.
     vector<pair<int, int>> occupied;
-    for (size_t i = 0; i < width_; i++) {
-        for (size_t j = 0; j < height_; j++) {
+    for (int i = 0; i < width_; i++) {
+        for (int j = 0; j < height_; j++) {
             if (map.logOdds(i, j) > 0) {
                 bool ignore = false;
                 if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) ignore = true;
@@ -48,8 +48,8 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
             }
         }   
     }
-    for (size_t i = 0; i < width_; i++) {
-        for (size_t j = 0; i < height_; i++) {
+    for (int i = 0; i < width_; i++) {
+        for (int j = 0; i < height_; i++) {
             float dis = numeric_limits<float>::infinity();
             for (size_t s = 0; s < occupied.size(); s++) {
                 float d = sqrt((i - occupied[s].first) * (i - occupied[s].first) + (j - occupied[s].second) * (j - occupied[s].second));

@@ -12,6 +12,12 @@ struct node
 {
     Point<int> coor;
     float fs;
+    bool operator<(const node& other) const {
+        return fs < other.fs;
+    }
+    bool operator==(const node& other) const {
+        return coor.x == other.coor.x && coor.y == other.coor.y; 
+    }
 };
 
 
@@ -41,9 +47,19 @@ robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> c
 
 float heuristic(Point<int> a, Point<int> b)
 {
-    float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+    // float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
     float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y);
     return manhattanDist;
+}
+
+
+bool inContainer(vector<Point<int>> ctn, Point<int> item)
+{
+    bool res = false;
+    for (auto i : ctn) {
+        if (i == item) res = true;
+    }
+    return res;
 }
 
 
@@ -88,17 +104,21 @@ robot_path_t search_for_path(pose_xyt_t start,
         }
         closedSet.push_back(current);
         openSet.pop();
-        remove(inOpen.begin(), inOpen.end(), current);
+        size_t idx = 0;
+        for (size_t i = 0; i < inOpen.size(); ++i) {
+            if (inOpen[i] == current) {
+                idx = i;
+                break;
+            }
+        }
+        inOpen.erase(inOpen.begin() + idx);
+        // remove(inOpen.begin(), inOpen.end(), current);
         vector<Point<int>> neighbors;
         for (size_t i = 0; i < 4; i++)
         {
             Point<int> neighbor;
             neighbor.x = current.x + nx[i];
             neighbor.y = current.y + ny[i];
-            // if (distances.isCellInGrid(neighbor.x, neighbor.y))
-            // {
-            //     neighbors.push_back(neighbor);
-            // }
             if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle)
             {
                 neighbors.push_back(neighbor);
@@ -106,7 +126,7 @@ robot_path_t search_for_path(pose_xyt_t start,
         }       
         for (auto neighbor : neighbors)
         {
-            if (find(closedSet.begin(), closedSet.end(), neighbor) != closedSet.end())
+            if (inContainer(closedSet, neighbor))
             {
                 continue;
             }
@@ -120,7 +140,7 @@ robot_path_t search_for_path(pose_xyt_t start,
                 cameFrom[neighbor] = current;
                 gScore[neighbor] = tentative_gScore;
                 fScore[neighbor] = gScore[neighbor] + heuristic(goalGrid, neighbor);
-                if (find(inOpen.begin(), inOpen.end(), neighbor) == inOpen.end())
+                if (!inContainer(inOpen, neighbor))
                 {
                     node pos;
                     pos.coor.x = neighbor.x;
