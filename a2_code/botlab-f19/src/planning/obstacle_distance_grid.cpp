@@ -16,8 +16,8 @@ ObstacleDistanceGrid::ObstacleDistanceGrid(void)
 coordinate ObstacleDistanceGrid::poseToCoor(pose_xyt_t pos) const
 {
     coordinate coor;
-    coor.x = (int)floor((pos.x - globalOrigin_.x) / metersPerCell_);
-    coor.y = (int)floor((pos.y - globalOrigin_.y) / metersPerCell_);
+    coor.x = (int)round((pos.x - globalOrigin_.x) / metersPerCell_);
+    coor.y = (int)round((pos.y - globalOrigin_.y) / metersPerCell_);
     return coor;
 }
 
