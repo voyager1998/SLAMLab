@@ -24,14 +24,18 @@ class coordinate_convert
 public:
     coordinate_convert();
 
-    coordinate get_end_point_coordinate(const adjusted_ray_t& ray, OccupancyGrid& map);
+    coordinate get_end_point_coordinate(const adjusted_ray_t& ray, const OccupancyGrid& map);
+
+    ray_coordinates get_ray_coordinates(const adjusted_ray_t& ray, const OccupancyGrid& map);
+
+     coordinate get_end_point_coordinate(const adjusted_ray_t& ray, OccupancyGrid& map);
 
     ray_coordinates get_ray_coordinates(const adjusted_ray_t& ray, OccupancyGrid& map);
 
     
     
 private:
-    coordinate get_coordinate(const Point<float>& pt, OccupancyGrid& map) const;
+    coordinate get_coordinate(const Point<float>& pt, const OccupancyGrid& map) const;
     
     Point<float> get_end_pt(const adjusted_ray_t& ray);
 
