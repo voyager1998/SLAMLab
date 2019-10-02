@@ -10,14 +10,34 @@ SensorModel::SensorModel(void) {
 
 double SensorModel::likelihood(const particle_t& sample, const lidar_t& scan, const OccupancyGrid& map) {
     ///////////// TODO: Implement your sensor model for calculating the likelihood of a particle given a laser scan //////////
+    double logP = 0.0;
     MovingLaserScan movingScan(scan, sample.parent_pose, sample.pose);
     for(auto adj_ray_iter = movingScan.begin(); adj_ray_iter < movingScan.end(); adj_ray_iter++)
     {
-        coordinate end_pt = coordinate_convert_.get_end_point_coordinate(*adj_ray_iter, map);
-        ray_coordinates ray_pts = coordinate_convert_.get_ray_coordinates(*adj_ray_iter, map);
+        auto ray = *adj_ray_iter;
+        ray.range += 0.07;
+        coordinate end_pt = coordinate_convert_.get_end_point_coordinate(ray, map);
+        ray_coordinates ray_pts = coordinate_convert_.get_ray_coordinates(ray, map);
+
+        int num_cells = ray_pts.size();
+        bool findwall = false;
+        for (int i = 0; i < num_cells; i++) {
+            coordinate temp = ray_pts[i];
+            if (map(temp.x,temp.y) > 0){
+                findwall = true;
+                if (num_cells - i > 3) {  // lidar is longer
+                    logP += -12;
+                    break;
+                } else {// lidar is just in place
+                    logP += -4;
+                    break;
+                }
+            }
+        }
+        if(findwall==false){//lidar is shorter
+            logP += -8;
+        }
     }
 
-
-    double scanLikelihood = sample.weight;
-    return scanLikelihood;
+    return logP;
 }
