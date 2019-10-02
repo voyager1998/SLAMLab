@@ -130,8 +130,8 @@ std::vector<particle_t> ParticleFilter::computeNormalizedPosterior(const std::ve
     std::vector<particle_t> posterior;
     vector<double> logPs;
     for (auto i : proposal) {
-        // double logP = sensorModel_.likelihood(i, laser, map);
-        double logP = sensorModel_.Gaussianlikelihood(i, laser, map);
+        double logP = sensorModel_.likelihood(i, laser, map);
+        // double logP = sensorModel_.Gaussianlikelihood(i, laser, map);
         logPs.push_back(logP);
     }
     double logPmax = *max_element(logPs.begin(), logPs.end());

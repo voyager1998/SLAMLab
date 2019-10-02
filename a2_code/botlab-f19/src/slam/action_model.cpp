@@ -7,8 +7,8 @@
 #include <slam/action_model.hpp>
 using namespace std;
 
-#define K1 0.7
-#define K2 0.1
+#define K1 1.0
+#define K2 0.4
 
 ActionModel::ActionModel(void) {
     // Handle any initialization for your ActionModel

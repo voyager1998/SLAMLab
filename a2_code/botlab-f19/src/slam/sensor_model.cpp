@@ -65,7 +65,9 @@ double SensorModel::Gaussianlikelihood(const particle_t& particle, const lidar_t
             if (map(temp.x, temp.y) > 0.1) {
                 findwall = true;
                 // when dist == SIGMA, logP += -0.5
-                logP += -pow(dist(temp, end_pt, map.metersPerCell()), 2) / (2 * pow(SIGMA, 2));
+                double distance_to_endpt = dist(temp, end_pt, map.metersPerCell());
+                // if (distance_to_endpt > 2 * SIGMA) std::cout << "warining: dist > map.height" << std::endl;
+                logP += -pow(distance_to_endpt, 2) / (2 * pow(SIGMA, 2));
                 break;
             }
         }
