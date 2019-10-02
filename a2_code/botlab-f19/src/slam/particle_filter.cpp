@@ -117,15 +117,17 @@ std::vector<particle_t> ParticleFilter::computeNormalizedPosterior(const std::ve
     double logPmax = *max_element(logPs.begin(), logPs.end());
     vector<double> shifted_P;
     double sum_shifted_P = 0.0;
-    for (int i = 0; i < logPs.size(); i++) {
+    for (size_t i = 0; i < logPs.size(); i++) {
         logPs[i] += -logPmax;
         double temp = exp(logPs[i]);
         shifted_P.push_back(temp);
         sum_shifted_P += temp;
     }
-    for (int i = 0; i < shifted_P.size(); i++) {
+    // printf("-----------------------------\n");
+    for (size_t i = 0; i < shifted_P.size(); i++) {
         particle_t temp = proposal[i];
         temp.weight = shifted_P[i] / sum_shifted_P;
+        // if (temp.weight > 0) cout << "weight = " << temp.weight << endl;
         posterior.push_back(temp);
     }
     return posterior;
@@ -134,14 +136,32 @@ std::vector<particle_t> ParticleFilter::computeNormalizedPosterior(const std::ve
 pose_xyt_t ParticleFilter::estimatePosteriorPose(const std::vector<particle_t>& posterior) {  //mean pose or maximun weight pose
     //////// TODO: Implement your method for computing the final pose estimate based on the posterior distribution
     pose_xyt_t pose;
+    pose.x = 0;
+    pose.y = 0;
+    pose.theta = 0;
+    pose.utime = posterior[0].pose.utime;
+    cout << "--------------------------------------" << endl;
+    // max weight:
     float max_weight = 0.0;
-    for (auto i : posterior_) {
+    for (auto i : posterior) {
         if (max_weight < i.weight) {
             max_weight = i.weight;
             pose.x = i.pose.x;
             pose.y = i.pose.y;
             pose.theta = i.pose.theta;
         }
+        if (max_weight > 0.5) {
+            cout << "Max weight pose found = " << max_weight << endl;
+            break;
+        }
     }
+
+    // weighted mean:
+    // for (auto i : posterior) {
+    //     pose.x += i.weight * i.pose.x;
+    //     pose.y += i.weight * i.pose.y;
+    //     pose.theta += i.weight * i.pose.theta;
+    // }
+
     return pose;
 }

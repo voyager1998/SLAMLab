@@ -7,7 +7,7 @@
 #include <slam/action_model.hpp>
 using namespace std;
 
-#define K1 0.1
+#define K1 0.7
 #define K2 0.1
 
 ActionModel::ActionModel(void) {
@@ -47,7 +47,6 @@ particle_t ActionModel::applyAction(const particle_t& sample) {
     new_sample.parent_pose.y = sample.pose.y;
     new_sample.parent_pose.theta = sample.pose.theta;
 
-    // float orient = fmod(sample.pose.theta + de_odo.theta + randomTheta(rd), 2 * M_PI); //TODO: fmod?
     float delta_S = sqrt(de_odo.x * de_odo.x + de_odo.y * de_odo.y);
     float alpha = atan2(de_odo.y, de_odo.x) - sample.pose.theta;
 
