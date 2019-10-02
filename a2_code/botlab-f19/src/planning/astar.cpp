@@ -10,7 +10,7 @@ using namespace std;
 
 struct node
 {
-    coordinate coor;
+    Point<int> coor;
     float fs;
 };
 
@@ -24,7 +24,7 @@ struct cmp
 };
 
 
-robot_path_t reconstruct_path(map<coordinate, coordinate> cameFrom, coordinate current, const ObstacleDistanceGrid& distances)
+robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> current, const ObstacleDistanceGrid& distances)
 {
     robot_path_t total_path;
     total_path.path.push_back(distances.coorTopose(current));
@@ -39,9 +39,9 @@ robot_path_t reconstruct_path(map<coordinate, coordinate> cameFrom, coordinate c
 }
 
 
-float heuristic(coordinate a, coordinate b)
+float heuristic(Point<int> a, Point<int> b)
 {
-    float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+    //float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
     float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y);
     return manhattanDist;
 }
@@ -63,15 +63,15 @@ robot_path_t search_for_path(pose_xyt_t start,
     path.path.push_back(start);    
     path.path_length = path.path.size();
 
-    coordinate startGrid = distances.poseToCoor(start);
-    coordinate goalGrid = distances.poseToCoor(goal);
+    Point<int> startGrid = distances.poseToCoor(start);
+    Point<int> goalGrid = distances.poseToCoor(goal);
     priority_queue<node, vector<node>, cmp> openSet;
-    vector<coordinate> inOpen;
-    vector<coordinate> closedSet;
-    map<coordinate, coordinate> cameFrom;
-    map<coordinate, float> gScore;
+    vector<Point<int>> inOpen;
+    vector<Point<int>> closedSet;
+    map<Point<int>, Point<int>> cameFrom;
+    map<Point<int>, float> gScore;
     gScore[startGrid] = 0;
-    map<coordinate, float> fScore;
+    map<Point<int>, float> fScore;
     fScore[startGrid] = heuristic(goalGrid, startGrid);
     node pos;
     pos.coor.x = startGrid.x;
@@ -81,33 +81,46 @@ robot_path_t search_for_path(pose_xyt_t start,
     inOpen.push_back(startGrid);
     while (!openSet.empty())
     {
-        coordinate current = openSet.top().coor;
+        Point<int> current = openSet.top().coor;
         if (current.x == goalGrid.x && current.y == goalGrid.y)
         {
             return reconstruct_path(cameFrom, current, distances);
         }
         closedSet.push_back(current);
         openSet.pop();
-        remove(inOpen.begin(), inOpen.end(), current);
-        vector<coordinate> neighbors;
+        size_t removeIdx = 0;
+        for (size_t i = 0; i < inOpen.size(); ++i) {
+            if (inOpen[i].x == current.x && inOpen[i].y == current.y) {
+                removeIdx = i;
+            }
+        }
+        inOpen.erase(inOpen.begin() + removeIdx);
+        // remove(inOpen.begin(), inOpen.end(), current);
+        vector<Point<int>> neighbors;
         for (size_t i = 0; i < 4; i++)
         {
-            coordinate neighbor;
+            Point<int> neighbor;
             neighbor.x = current.x + nx[i];
             neighbor.y = current.y + ny[i];
             // if (distances.isCellInGrid(neighbor.x, neighbor.y))
             // {
             //     neighbors.push_back(neighbor);
             // }
-            if ((neighbor.x, neighbor.y) > params.minDistanceToObstacle)
+            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle)
             {
                 neighbors.push_back(neighbor);
             }
         }       
         for (auto neighbor : neighbors)
         {
-            if (find(closedSet.begin(), closedSet.end(), neighbor) != closedSet.end())
-            {
+            bool inClosed = false;
+            for (auto i : closedSet) {
+                if (i.x == neighbor.x && i.y == neighbor.y) {
+                    inClosed = true;
+                    break;
+                }
+            }
+            if (inClosed) {
                 continue;
             }
             float tentative_gScore = gScore[current] + heuristic(neighbor, current);
@@ -120,7 +133,14 @@ robot_path_t search_for_path(pose_xyt_t start,
                 cameFrom[neighbor] = current;
                 gScore[neighbor] = tentative_gScore;
                 fScore[neighbor] = gScore[neighbor] + heuristic(goalGrid, neighbor);
-                if (find(inOpen.begin(), inOpen.end(), neighbor) == inOpen.end())
+                bool inOp = false;
+                for (auto i : inOpen) {
+                    if (i.x == neighbor.x && i.y == neighbor.y) {
+                        inOp = true;
+                        break;
+                    }
+                }
+                if (!inOp)
                 {
                     node pos;
                     pos.coor.x = neighbor.x;
