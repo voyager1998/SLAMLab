@@ -41,6 +41,21 @@ robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> c
         total_path.path.insert(total_path.path.begin(), distances.coorTopose(current));
         total_path.path_length = total_path.path.size();
     }
+    total_path.path[0].theta = 0.0f;
+    for (int i = 0; i < total_path.path_length - 1; i++)
+    {
+        float dx = total_path.path[i + 1].x - total_path.path[i].x;
+        float dy = total_path.path[i + 1].y - total_path.path[i].y;
+        if (dx == 0 && dy < 0) total_path.path[i].theta = M_PI / 2;
+        if (dx == 0 && dy > 0) total_path.path[i].theta = 3 * M_PI / 2;
+        if (dy == 0 && dx < 0) total_path.path[i].theta = M_PI;
+        if (dy == 0 && dx > 0) total_path.path[i].theta = 0;
+        if (dx < 0 && dy < 0) total_path.path[i].theta = M_PI - atan2(-dy, -dx);
+        if (dx < 0 && dy > 0) total_path.path[i].theta = M_PI + atan2(dy, -dx);
+        if (dx > 0 && dy < 0) total_path.path[i].theta = atan2(-dy, dx);
+        if (dx > 0 && dy > 0) total_path.path[i].theta = 2 * M_PI - atan2(dy, dx);
+    }
+    total_path.path[total_path.path_length - 1].theta = 0.0f;
     return total_path;
 }
 
@@ -48,6 +63,7 @@ robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> c
 float heuristic(Point<int> a, Point<int> b)
 {
     // float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+    // return euclideanDist;
     float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y);
     return manhattanDist;
 }
@@ -63,8 +79,8 @@ bool inContainer(vector<Point<int>> ctn, Point<int> item)
 }
 
 
-vector<int> nx = {1, -1, 0, 0};
-vector<int> ny = {0, 0, 1, -1};
+vector<int> nx = {1, -1, 0, 0, 1, 1, -1, -1};
+vector<int> ny = {0, 0, 1, -1, 1, -1, 1, -1};
 
 
 robot_path_t search_for_path(pose_xyt_t start, 
@@ -81,6 +97,8 @@ robot_path_t search_for_path(pose_xyt_t start,
 
     Point<int> startGrid = distances.poseToCoor(start);
     Point<int> goalGrid = distances.poseToCoor(goal);
+    cout << startGrid.x << ' ' << startGrid.y << endl;
+    cout << goalGrid.x << ' ' << goalGrid.y << endl;
     priority_queue<node, vector<node>, cmp> openSet;
     vector<Point<int>> inOpen;
     vector<Point<int>> closedSet;
@@ -90,15 +108,14 @@ robot_path_t search_for_path(pose_xyt_t start,
     map<Point<int>, float> fScore;
     fScore[startGrid] = heuristic(goalGrid, startGrid);
     node pos;
-    pos.coor.x = startGrid.x;
-    pos.coor.y = startGrid.y;
+    pos.coor = startGrid;
     pos.fs = fScore[startGrid];
     openSet.push(pos);
     inOpen.push_back(startGrid);
     while (!openSet.empty())
     {
         Point<int> current = openSet.top().coor;
-        if (current.x == goalGrid.x && current.y == goalGrid.y)
+        if (current == goalGrid)
         {
             return reconstruct_path(cameFrom, current, distances);
         }
@@ -112,14 +129,14 @@ robot_path_t search_for_path(pose_xyt_t start,
             }
         }
         inOpen.erase(inOpen.begin() + idx);
-        // remove(inOpen.begin(), inOpen.end(), current);
         vector<Point<int>> neighbors;
         for (size_t i = 0; i < 4; i++)
         {
             Point<int> neighbor;
             neighbor.x = current.x + nx[i];
             neighbor.y = current.y + ny[i];
-            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle)
+            if (!distances.isCellInGrid(neighbor.x, neighbor.y)) continue;
+            if (distances(neighbor.x, neighbor.y) >= params.minDistanceToObstacle)
             {
                 neighbors.push_back(neighbor);
             }
@@ -130,7 +147,7 @@ robot_path_t search_for_path(pose_xyt_t start,
             {
                 continue;
             }
-            float tentative_gScore = gScore[current] + heuristic(neighbor, current);
+            float tentative_gScore = gScore[current] + distance_between_points(neighbor, current);
             if (gScore.find(neighbor) == gScore.end()) 
             {
                 gScore[neighbor] = numeric_limits<float>::infinity();
@@ -143,8 +160,7 @@ robot_path_t search_for_path(pose_xyt_t start,
                 if (!inContainer(inOpen, neighbor))
                 {
                     node pos;
-                    pos.coor.x = neighbor.x;
-                    pos.coor.y = neighbor.y;
+                    pos.coor = neighbor;
                     pos.fs = fScore[neighbor];
                     openSet.push(pos);
                     inOpen.push_back(neighbor);
