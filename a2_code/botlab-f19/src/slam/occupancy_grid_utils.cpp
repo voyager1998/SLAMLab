@@ -176,6 +176,10 @@ Point<float> coordinate_convert::get_end_pt(const adjusted_ray_t& ray)
     return end_pt;
 }
 
+double dist(coordinate c1, coordinate c2, double cellsize){
+    return sqrt(pow((c1.x - c2.x) * cellsize, 2) + pow((c1.y - c2.y) * cellsize, 2));
+}
+
 /*
 int main(int argc, char** argv)
 {

@@ -8,14 +8,17 @@
 #define LIDARLONGER -12
 #define LIDARSHORTER -8
 
+#define SIGMA 0.2
+#define RANGE 0.3
+
 SensorModel::SensorModel(void) {
     ///////// TODO: Handle any initialization needed for your sensor model
 }
 
-double SensorModel::likelihood(const particle_t& sample, const lidar_t& scan, const OccupancyGrid& map) {
+double SensorModel::likelihood(const particle_t& particle, const lidar_t& scan, const OccupancyGrid& map) {
     // Implement your sensor model for calculating the likelihood of a particle given a laser scan //////////
     double logP = 0.0;
-    MovingLaserScan movingScan(scan, sample.parent_pose, sample.pose);
+    MovingLaserScan movingScan(scan, particle.parent_pose, particle.pose);
     for(auto adj_ray_iter = movingScan.begin(); adj_ray_iter < movingScan.end(); adj_ray_iter++)
     {
         auto ray = *adj_ray_iter;
@@ -40,6 +43,34 @@ double SensorModel::likelihood(const particle_t& sample, const lidar_t& scan, co
         }
         if(findwall==false){//lidar is shorter
             logP += LIDARSHORTER;
+        }
+    }
+
+    return logP;
+}
+
+double SensorModel::Gaussianlikelihood(const particle_t& particle, const lidar_t& scan, const OccupancyGrid& map) {
+    double logP = 0.0;
+    MovingLaserScan movingScan(scan, particle.parent_pose, particle.pose);
+    for (auto adj_ray_iter = movingScan.begin(); adj_ray_iter < movingScan.end(); adj_ray_iter++) {
+        auto ray = *adj_ray_iter;
+        ray.range += RANGE;
+        coordinate end_pt = coordinate_convert_.get_end_point_coordinate(ray, map);
+        ray_coordinates ray_pts = coordinate_convert_.get_ray_coordinates(ray, map);
+
+        int num_cells = ray_pts.size();
+        bool findwall = false;
+        for (int i = 0; i < num_cells; i++) {
+            coordinate temp = ray_pts[i];
+            if (map(temp.x, temp.y) > 0.1) {
+                findwall = true;
+                // when dist == SIGMA, logP += -0.5
+                logP += -pow(dist(temp, end_pt, map.metersPerCell()), 2) / (2 * pow(SIGMA, 2));
+                break;
+            }
+        }
+        if (findwall == false) {  //lidar is shorter
+            logP += -pow(RANGE, 2) / (2 * pow(SIGMA, 2));
         }
     }
 
