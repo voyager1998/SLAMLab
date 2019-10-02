@@ -80,6 +80,7 @@ ray_coordinates coordinate_convert::get_ray_coordinates(const adjusted_ray_t& ra
             result.push_back(coordinate(x0, y0));
         }
     }
+    result.pop_back();
     return result;
 }
 
@@ -157,6 +158,7 @@ ray_coordinates coordinate_convert::get_ray_coordinates(const adjusted_ray_t& ra
             result.push_back(coordinate(x0, y0));
         }
     }
+    result.pop_back();
     return result;
 }
 

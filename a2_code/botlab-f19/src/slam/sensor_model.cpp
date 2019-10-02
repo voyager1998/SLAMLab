@@ -23,8 +23,9 @@ double SensorModel::likelihood(const particle_t& particle, const lidar_t& scan, 
     {
         auto ray = *adj_ray_iter;
         // ray.range += 0.07;
-        // coordinate end_pt = coordinate_convert_.get_end_point_coordinate(ray, map);
+        coordinate end_pt = coordinate_convert_.get_end_point_coordinate(ray, map);
         ray_coordinates ray_pts = coordinate_convert_.get_ray_coordinates(ray, map);
+        ray_pts.push_back(end_pt);
 
         int num_cells = ray_pts.size();
         bool findwall = false;
@@ -41,7 +42,7 @@ double SensorModel::likelihood(const particle_t& particle, const lidar_t& scan, 
                 }
             }
         }
-        if(findwall==false){//lidar is shorter
+        if(!findwall){//lidar is shorter
             logP += LIDARSHORTER;
         }
     }
