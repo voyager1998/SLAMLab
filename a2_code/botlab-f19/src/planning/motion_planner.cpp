@@ -76,7 +76,16 @@ bool MotionPlanner::isPathSafe(const robot_path_t& path) const
 {
 
     ///////////// TODO: Implement your test for a safe path here //////////////////
-
+    size_t num_setpoints = path.path_length;
+    if (num_setpoints <= 1) {
+        return true;
+    } else {
+        for (size_t i = 0; i < num_setpoints; i++) {
+            if ((path.path[i].x, path.path[i].y) <= searchParams_.minDistanceToObstacle) {
+                return false;
+            }
+        }
+    }
     return true;
 }
 
