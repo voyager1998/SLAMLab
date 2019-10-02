@@ -99,7 +99,7 @@ robot_path_t search_for_path(pose_xyt_t start,
             // {
             //     neighbors.push_back(neighbor);
             // }
-            if ((neighbor.x, neighbor.y) > params.minDistanceToObstacle)
+            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle)
             {
                 neighbors.push_back(neighbor);
             }
