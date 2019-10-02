@@ -8,11 +8,11 @@
 class OccupancyGrid;
 
 
-struct coordinate
-{
-    int x;
-    int y;
-};
+// struct coordinate
+// {
+//     int x;
+//     int y;
+// };
 
 
 /**
@@ -47,8 +47,8 @@ public:
     
     Point<float> originInGlobalFrame(void) const { return globalOrigin_; }
 
-    coordinate poseToCoor(pose_xyt_t pos) const;
-    pose_xyt_t coorTopose(coordinate current) const;
+    Point<int> poseToCoor(pose_xyt_t pos) const;
+    pose_xyt_t coorTopose(Point<int> current) const;
     
     /**
     * setDistances sets the obstacle distances stored in the grid based on the provided occupancy grid map of the
