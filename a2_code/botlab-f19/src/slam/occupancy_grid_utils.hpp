@@ -1,3 +1,6 @@
+#ifndef SLAM_OCCUPANCY_GRID_UTILS_HPP
+#define SLAM_OCCUPANCY_GRID_UTILS_HPP
+
 #include <slam/occupancy_grid.hpp>
 #include <slam/moving_laser_scan.hpp>
 #include <vector>
@@ -40,3 +43,4 @@ private:
     Point<float> get_end_pt(const adjusted_ray_t& ray);
 
 };
+#endif
