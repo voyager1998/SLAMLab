@@ -84,7 +84,7 @@ robot_path_t search_for_path(pose_xyt_t start,
         coordinate current = openSet.top().coor;
         if (current.x == goalGrid.x && current.y == goalGrid.y)
         {
-            return reconstruct_path(cameFrom, current);
+            return reconstruct_path(cameFrom, current, distances);
         }
         closedSet.push_back(current);
         openSet.pop();
@@ -95,7 +95,11 @@ robot_path_t search_for_path(pose_xyt_t start,
             coordinate neighbor;
             neighbor.x = current.x + nx[i];
             neighbor.y = current.y + ny[i];
-            if (distances.isCellInGrid(neighbor.x, neighbor.y))
+            // if (distances.isCellInGrid(neighbor.x, neighbor.y))
+            // {
+            //     neighbors.push_back(neighbor);
+            // }
+            if ((neighbor.x, neighbor.y) > params.minDistanceToObstacle)
             {
                 neighbors.push_back(neighbor);
             }

@@ -1,5 +1,7 @@
 #include <planning/obstacle_distance_grid.hpp>
 #include <slam/occupancy_grid.hpp>
+#include <limits>
+using namespace std;
 
 
 ObstacleDistanceGrid::ObstacleDistanceGrid(void)
@@ -36,6 +38,26 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
     resetGrid(map);
     
     ///////////// TODO: Implement an algorithm to mark the distance to the nearest obstacle for every cell in the map.
+    vector<pair<int, int>> occupied;
+    for (size_t i = 0; i < width_; i++) {
+        for (size_t j = 0; j < height_; j++) {
+            if (map.logOdds(i, j) > 0) {
+                bool ignore = false;
+                if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) ignore = true;
+                if (!ignore) occupied.push_back(make_pair(i, j));
+            }
+        }   
+    }
+    for (size_t i = 0; i < width_; i++) {
+        for (size_t j = 0; i < height_; i++) {
+            float dis = numeric_limits<float>::infinity();
+            for (size_t s = 0; s < occupied.size(); s++) {
+                float d = sqrt((i - occupied[s].first) * (i - occupied[s].first) + (j - occupied[s].second) * (j - occupied[s].second));
+                if (d < dis) dis = d;
+            }
+            cells_[cellIndex(i, j)] = dis;
+        }    
+    }
 }
 
 
