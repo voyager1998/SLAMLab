@@ -12,7 +12,7 @@
 #define RANGE 0.3
 
 SensorModel::SensorModel(void) {
-    ///////// TODO: Handle any initialization needed for your sensor model
+    // Handle any initialization needed for your sensor model
 }
 
 double SensorModel::likelihood(const particle_t& particle, const lidar_t& scan, const OccupancyGrid& map) {
