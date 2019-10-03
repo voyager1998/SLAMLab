@@ -6,6 +6,8 @@
 #include <cassert>
 #include <chrono>
 
+#define DEBUG
+
 OccupancyGridSLAM::OccupancyGridSLAM(int         numParticles,
                                      int8_t      hitOddsIncrease,
                                      int8_t      missOddsDecrease,
@@ -255,6 +257,11 @@ void OccupancyGridSLAM::updateLocalization(void)
         auto particles = filter_.particles();
 
         lcm_.publish(SLAM_POSE_CHANNEL, &currentPose_);
+#ifdef DEBUG
+        for (int i = 0; i < particles.num_particles; i++) {
+            particles.particles[i].weight = 1.0 / particles.num_particles;
+        }
+#endif
         lcm_.publish(SLAM_PARTICLES_CHANNEL, &particles);
 
    }

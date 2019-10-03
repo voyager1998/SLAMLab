@@ -63,7 +63,7 @@ double SensorModel::Gaussianlikelihood(const particle_t& particle, const lidar_t
         bool findwall = false;
         for (int i = 0; i < num_cells; i++) {
             coordinate temp = ray_pts[i];
-            if (map(temp.x, temp.y) > 0.1) {
+            if (map(temp.x, temp.y) > 0) {
                 findwall = true;
                 // when dist == SIGMA, logP += -0.5
                 double distance_to_endpt = dist(temp, end_pt, map.metersPerCell());
@@ -73,7 +73,7 @@ double SensorModel::Gaussianlikelihood(const particle_t& particle, const lidar_t
             }
         }
         if (findwall == false) {  //lidar is shorter
-            logP += -pow(RANGE, 2) / (2 * pow(SIGMA, 2));
+            logP += -pow(RANGE, 2) / (2 * pow(SIGMA, 2)) - 0.5;
         }
     }
 
