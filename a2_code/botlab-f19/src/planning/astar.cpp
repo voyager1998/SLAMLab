@@ -5,6 +5,7 @@
 #include <queue>
 #include <math.h>
 #include <limits>
+#include <iostream>
 using namespace std;
 
 
@@ -90,6 +91,7 @@ robot_path_t search_for_path(pose_xyt_t start,
 {
     ////////////////// TODO: Implement your A* search here //////////////////////////
     
+    // std::cout <<  "****************************" << std::endl;
     robot_path_t path;
     path.utime = start.utime;
     path.path.push_back(start);    
@@ -97,8 +99,9 @@ robot_path_t search_for_path(pose_xyt_t start,
 
     Point<int> startGrid = distances.poseToCoor(start);
     Point<int> goalGrid = distances.poseToCoor(goal);
-    cout << startGrid.x << ' ' << startGrid.y << endl;
-    cout << goalGrid.x << ' ' << goalGrid.y << endl;
+    // cout << "*******" << endl;
+    // cout << startGrid.x << ' ' << startGrid.y << endl;
+    // cout << goalGrid.x << ' ' << goalGrid.y << endl;
     priority_queue<node, vector<node>, cmp> openSet;
     vector<Point<int>> inOpen;
     vector<Point<int>> closedSet;
@@ -136,10 +139,10 @@ robot_path_t search_for_path(pose_xyt_t start,
             neighbor.x = current.x + nx[i];
             neighbor.y = current.y + ny[i];
             if (!distances.isCellInGrid(neighbor.x, neighbor.y)) continue;
-            if (distances(neighbor.x, neighbor.y) >= params.minDistanceToObstacle)
-            {
+            // if (distances(neighbor.x, neighbor.y) >= params.minDistanceToObstacle)
+            // {
                 neighbors.push_back(neighbor);
-            }
+            // }
         }       
         for (auto neighbor : neighbors)
         {
@@ -147,10 +150,16 @@ robot_path_t search_for_path(pose_xyt_t start,
             {
                 continue;
             }
+            if (gScore.find(current) == gScore.end()) 
+            {
+                gScore[current] = numeric_limits<float>::infinity();
+                // gScore[current] = 10000.0f;
+            }
             float tentative_gScore = gScore[current] + distance_between_points(neighbor, current);
             if (gScore.find(neighbor) == gScore.end()) 
             {
                 gScore[neighbor] = numeric_limits<float>::infinity();
+                // gScore[neighbor] = 10000.0f;
             }
             if (tentative_gScore < gScore[neighbor])
             {
