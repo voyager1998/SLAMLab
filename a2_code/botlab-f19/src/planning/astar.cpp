@@ -68,7 +68,7 @@ float heuristic(Point<int> a, Point<int> b)
     srand(time(NULL));
     // float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
     // return euclideanDist;
-    float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y) + ((double) rand() / (RAND_MAX)) + 1;
+    float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y) + ((double) rand() / (RAND_MAX));
     return manhattanDist;
 }
 
