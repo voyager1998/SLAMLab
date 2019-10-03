@@ -136,13 +136,13 @@ robot_path_t search_for_path(pose_xyt_t start,
         }
         inOpen.erase(inOpen.begin() + idx);
         vector<Point<int>> neighbors;
-        for (size_t i = 0; i < 4; i++)
+        for (size_t i = 0; i < 8; i++)
         {
             Point<int> neighbor;
             neighbor.x = current.x + nx[i];
             neighbor.y = current.y + ny[i];
             if (!distances.isCellInGrid(neighbor.x, neighbor.y)) continue;
-            if (distances(neighbor.x, neighbor.y) >= params.minDistanceToObstacle)
+            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + 0.2)
             {
                 neighbors.push_back(neighbor);
             }
