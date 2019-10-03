@@ -6,6 +6,8 @@
 #include <math.h>
 #include <limits>
 #include <iostream>
+#include <time.h>
+#include <stdlib.h>
 using namespace std;
 
 
@@ -63,9 +65,10 @@ robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> c
 
 float heuristic(Point<int> a, Point<int> b)
 {
+    srand(time(NULL));
     // float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
     // return euclideanDist;
-    float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y);
+    float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y) + ((double) rand() / (RAND_MAX)) + 1;
     return manhattanDist;
 }
 
@@ -91,7 +94,7 @@ robot_path_t search_for_path(pose_xyt_t start,
 {
     ////////////////// TODO: Implement your A* search here //////////////////////////
     
-    // std::cout <<  "****************************" << std::endl;
+    // std::cout <<  "#################################" << std::endl;
     robot_path_t path;
     path.utime = start.utime;
     path.path.push_back(start);    
@@ -139,10 +142,10 @@ robot_path_t search_for_path(pose_xyt_t start,
             neighbor.x = current.x + nx[i];
             neighbor.y = current.y + ny[i];
             if (!distances.isCellInGrid(neighbor.x, neighbor.y)) continue;
-            // if (distances(neighbor.x, neighbor.y) >= params.minDistanceToObstacle)
-            // {
+            if (distances(neighbor.x, neighbor.y) >= params.minDistanceToObstacle)
+            {
                 neighbors.push_back(neighbor);
-            // }
+            }
         }       
         for (auto neighbor : neighbors)
         {

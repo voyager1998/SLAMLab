@@ -1,6 +1,7 @@
 #include <planning/obstacle_distance_grid.hpp>
 #include <slam/occupancy_grid.hpp>
 #include <limits>
+#include <iostream>
 using namespace std;
 
 
@@ -38,24 +39,35 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
     resetGrid(map);
     
     ///////////// TODO: Implement an algorithm to mark the distance to the nearest obstacle for every cell in the map.
+    for (int i = 0; i < width_; i++) {
+        for (int j = 0; j < height_; j++) {
+            cells_[cellIndex(i, j)] = 999;
+        }
+    }
     vector<pair<int, int>> occupied;
     for (int i = 0; i < width_; i++) {
         for (int j = 0; j < height_; j++) {
-            if (map.logOdds(i, j) > 0) {
+            if (map.logOdds(i, j) >= 0) {
                 bool ignore = false;
-                if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) ignore = true;
+                if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) {
+                    ignore = true;
+                    cells_[cellIndex(i, j)] = 0;
+                }
                 if (!ignore) occupied.push_back(make_pair(i, j));
             }
         }   
     }
+    // for (auto i : occupied) cout << i.first << ' ' << i.second << endl;
     for (int i = 0; i < width_; i++) {
-        for (int j = 0; i < height_; i++) {
-            float dis = numeric_limits<float>::infinity();
+        for (int j = 0; j < height_; j++) {
+            float dis = 10000.f;
             for (size_t s = 0; s < occupied.size(); s++) {
                 float d = sqrt((i - occupied[s].first) * (i - occupied[s].first) + (j - occupied[s].second) * (j - occupied[s].second));
                 if (d < dis) dis = d;
             }
-            cells_[cellIndex(i, j)] = dis;
+            // cout << dis << endl;
+            if (cells_[cellIndex(i, j)] != 0)
+                cells_[cellIndex(i, j)] = dis / 10;
         }    
     }
 }
