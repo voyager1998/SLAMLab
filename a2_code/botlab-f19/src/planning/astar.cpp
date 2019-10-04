@@ -33,10 +33,10 @@ struct cmp
 };
 
 
-robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> current, const ObstacleDistanceGrid& distances)
+robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> current, const ObstacleDistanceGrid& distances, pose_xyt_t start, pose_xyt_t goal)
 {
     robot_path_t total_path;
-    total_path.path.push_back(distances.coorTopose(current));
+    total_path.path.push_back(goal);
     total_path.path_length = total_path.path.size();
     while (cameFrom.find(current) != cameFrom.end())
     {
@@ -44,21 +44,22 @@ robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> c
         total_path.path.insert(total_path.path.begin(), distances.coorTopose(current));
         total_path.path_length = total_path.path.size();
     }
-    total_path.path[0].theta = 0.0f;
-    for (int i = 0; i < total_path.path_length - 1; i++)
-    {
-        float dx = total_path.path[i + 1].x - total_path.path[i].x;
-        float dy = total_path.path[i + 1].y - total_path.path[i].y;
-        if (dx == 0 && dy < 0) total_path.path[i].theta = M_PI / 2;
-        if (dx == 0 && dy > 0) total_path.path[i].theta = 3 * M_PI / 2;
-        if (dy == 0 && dx < 0) total_path.path[i].theta = M_PI;
-        if (dy == 0 && dx > 0) total_path.path[i].theta = 0;
-        if (dx < 0 && dy < 0) total_path.path[i].theta = M_PI - atan2(-dy, -dx);
-        if (dx < 0 && dy > 0) total_path.path[i].theta = M_PI + atan2(dy, -dx);
-        if (dx > 0 && dy < 0) total_path.path[i].theta = atan2(-dy, dx);
-        if (dx > 0 && dy > 0) total_path.path[i].theta = 2 * M_PI - atan2(dy, dx);
-    }
-    total_path.path[total_path.path_length - 1].theta = 0.0f;
+    // total_path.path[0].theta = 0.0f;
+    // for (int i = 0; i < total_path.path_length - 1; i++)
+    // {
+    //     float dx = total_path.path[i + 1].x - total_path.path[i].x;
+    //     float dy = total_path.path[i + 1].y - total_path.path[i].y;
+    //     if (dx == 0 && dy < 0) total_path.path[i].theta = M_PI / 2;
+    //     if (dx == 0 && dy > 0) total_path.path[i].theta = 3 * M_PI / 2;
+    //     if (dy == 0 && dx < 0) total_path.path[i].theta = M_PI;
+    //     if (dy == 0 && dx > 0) total_path.path[i].theta = 0;
+    //     if (dx < 0 && dy < 0) total_path.path[i].theta = M_PI - atan2(-dy, -dx);
+    //     if (dx < 0 && dy > 0) total_path.path[i].theta = M_PI + atan2(dy, -dx);
+    //     if (dx > 0 && dy < 0) total_path.path[i].theta = atan2(-dy, dx);
+    //     if (dx > 0 && dy > 0) total_path.path[i].theta = 2 * M_PI - atan2(dy, dx);
+    // }
+    // total_path.path[total_path.path_length - 1].theta = 0.0f;
+    total_path.path[0] = start;
     return total_path;
 }
 
@@ -123,7 +124,7 @@ robot_path_t search_for_path(pose_xyt_t start,
         Point<int> current = openSet.top().coor;
         if (current == goalGrid)
         {
-            return reconstruct_path(cameFrom, current, distances);
+            return reconstruct_path(cameFrom, current, distances, start, goal);
         }
         closedSet.push_back(current);
         openSet.pop();
