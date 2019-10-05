@@ -80,6 +80,7 @@ ray_coordinates coordinate_convert::get_ray_coordinates(const adjusted_ray_t& ra
             result.push_back(coordinate(x0, y0));
         }
     }
+    result.pop_back();
     return result;
 }
 
@@ -157,6 +158,7 @@ ray_coordinates coordinate_convert::get_ray_coordinates(const adjusted_ray_t& ra
             result.push_back(coordinate(x0, y0));
         }
     }
+    result.pop_back();
     return result;
 }
 
@@ -174,6 +176,10 @@ Point<float> coordinate_convert::get_end_pt(const adjusted_ray_t& ray)
     end_pt.x = ray.origin.x + ray.range * cos(ray.theta);
     end_pt.y = ray.origin.y + ray.range * sin(ray.theta);
     return end_pt;
+}
+
+double dist(coordinate c1, coordinate c2, double cellsize){
+    return sqrt(pow((c1.x - c2.x) * cellsize, 2) + pow((c1.y - c2.y) * cellsize, 2));
 }
 
 /*

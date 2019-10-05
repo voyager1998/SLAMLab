@@ -7,8 +7,8 @@
 #include <slam/action_model.hpp>
 using namespace std;
 
-#define K1 0.7
-#define K2 0.1
+#define K1 1.0
+#define K2 0.4
 
 ActionModel::ActionModel(void) {
     // Handle any initialization for your ActionModel
@@ -62,7 +62,7 @@ particle_t ActionModel::applyAction(const particle_t& sample) {
 
     new_sample.pose.x = sample.pose.x + (delta_S + e2) * cos(sample.pose.theta + alpha + e1);
     new_sample.pose.y = sample.pose.y + (delta_S + e2) * sin(sample.pose.theta + alpha + e1);
-    new_sample.pose.theta = sample.pose.theta + de_odo.theta + e1 + e3;
+    new_sample.pose.theta = wrap_to_pi(sample.pose.theta + de_odo.theta + e1 + e3);
 
     new_sample.weight = sample.weight;  //TODO: sample.weight? 1/numparticles?
     new_sample.pose.utime = de_odo.utime;

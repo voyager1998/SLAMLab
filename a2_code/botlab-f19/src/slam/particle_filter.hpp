@@ -6,6 +6,7 @@
 #include <lcmtypes/particle_t.hpp>
 #include <lcmtypes/particles_t.hpp>
 #include <lcmtypes/pose_xyt_t.hpp>
+#include <lcmtypes/lidar_t.hpp>
 #include <vector>
 
 class lidar_t;
