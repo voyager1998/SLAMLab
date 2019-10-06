@@ -100,7 +100,20 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
     *       be able to drive straight to a frontier cell, but will need to drive somewhere close.
     */
     robot_path_t emptyPath;
-    
+    bool ispathfound = false;
+    for (auto frontier : frontiers) {
+        for (auto cell : frontier.cells) {
+            pose_xyt_t goalpos;
+            goalpos.x = cell.x;
+            goalpos.y = cell.y;
+            emptyPath = planner.planPath(robotPose, goalpos);
+            if (emptyPath.path_length > 1){
+                ispathfound = true;
+                break;
+            }
+        }
+        if (ispathfound) break;
+    }
     return emptyPath;
 }
 
