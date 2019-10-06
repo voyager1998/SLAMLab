@@ -2,9 +2,17 @@
 #define PLANNING_OBSTACLE_DISTANCE_GRID_HPP
 
 #include <common/point.hpp>
+#include <lcmtypes/pose_xyt_t.hpp>
 #include <vector>
 
 class OccupancyGrid;
+
+
+// struct coordinate
+// {
+//     int x;
+//     int y;
+// };
 
 
 /**
@@ -38,6 +46,9 @@ public:
     float cellsPerMeter(void) const { return cellsPerMeter_; }
     
     Point<float> originInGlobalFrame(void) const { return globalOrigin_; }
+
+    Point<int> poseToCoor(pose_xyt_t pos) const;
+    pose_xyt_t coorTopose(Point<int> current) const;
     
     /**
     * setDistances sets the obstacle distances stored in the grid based on the provided occupancy grid map of the
