@@ -8,6 +8,9 @@
 #define RESAMPLEPORTION 0.8
 #define ITERATIONS 5
 #define STARTITER 3
+#define USEGAUSSIAN
+// #define USEITERATIVE
+// #define RANDOMINIT
 using namespace std;
 
 int sampleFromWeightBar(float sample, std::vector<float> weight_bar) {
@@ -26,6 +29,7 @@ ParticleFilter::ParticleFilter(int numParticles)
 
 void ParticleFilter::initializeFilterAtPose(const pose_xyt_t& pose, const OccupancyGrid& map) {
     // TODO: Implement your method for initializing the particles in the particle filter
+#ifdef RANDOMINIT
     float map_width = map.widthInMeters();
     float map_height = map.heightInMeters();
     srand(time(NULL));
@@ -38,6 +42,14 @@ void ParticleFilter::initializeFilterAtPose(const pose_xyt_t& pose, const Occupa
         posterior_[i].pose.theta = wrap_to_pi(pose.theta + randomTheta(rd));
         posterior_[i].weight = 1.0 / (float)kNumParticles_;
     }
+#else
+    for (int i = 0; i < kNumParticles_; i++) {
+        posterior_[i].pose.x = pose.x;
+        posterior_[i].pose.y = pose.y;
+        posterior_[i].pose.theta =pose.theta;
+        posterior_[i].weight = 1.0 / (float)kNumParticles_;
+    }
+#endif
 }
 
 pose_xyt_t ParticleFilter::updateFilter(const pose_xyt_t& odometry,
@@ -49,11 +61,13 @@ pose_xyt_t ParticleFilter::updateFilter(const pose_xyt_t& odometry,
 
     if (hasRobotMoved) {
         cout << "--------------------------------------" << endl;
-        // auto prior = resamplePosteriorDistribution();
-        // auto proposal = computeProposalDistribution(prior);
-        // posterior_ = computeNormalizedPosterior(proposal, laser, map);
+#ifndef USEITERATIVE
+        auto prior = resamplePosteriorDistribution();
+        auto proposal = computeProposalDistribution(prior);
+        posterior_ = computeNormalizedPosterior(proposal, laser, map);
+#else
         posterior_ = PosteriorGenerater(laser, map);
-
+#endif
         posteriorPose_ = estimatePosteriorPose(posterior_);
     }
 
@@ -134,8 +148,11 @@ std::vector<particle_t> ParticleFilter::computeNormalizedPosterior(const std::ve
     std::vector<particle_t> posterior;
     vector<double> logPs;
     for (auto i : proposal) {
-        // double logP = sensorModel_.likelihood(i, laser, map);
+#ifdef USEGAUSSIAN
         double logP = sensorModel_.Gaussianlikelihood(i, laser, map);
+#else
+        double logP = sensorModel_.likelihood(i, laser, map);
+#endif
         logPs.push_back(logP);
     }
     double logPmax = *max_element(logPs.begin(), logPs.end());
@@ -254,8 +271,11 @@ std::vector<particle_t> ParticleFilter::PosteriorGenerater(const lidar_t& laser,
     std::vector<particle_t> posterior;
     vector<double> logPs;
     for (auto i : proposal) {
+#ifdef USEGAUSSIAN
+        double logP = sensorModel_.Gaussianlikelihood(i, laser, map);
+#else
         double logP = sensorModel_.likelihood(i, laser, map);
-        // double logP = sensorModel_.Gaussianlikelihood(i, laser, map);
+#endif
         logPs.push_back(logP);
     }
     auto resampleCenter = proposal[(max_element(logPs.begin(), logPs.end()) - logPs.begin())];

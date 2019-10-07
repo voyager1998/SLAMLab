@@ -8,7 +8,7 @@
 #define LIDARLONGER -12
 #define LIDARSHORTER -8
 
-#define SIGMA 0.2
+#define SIGMA 2
 #define RANGE 0.3
 
 SensorModel::SensorModel(void) {
