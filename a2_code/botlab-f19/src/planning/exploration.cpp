@@ -59,7 +59,6 @@ bool Exploration::exploreEnvironment()
         && (state_ != exploration_status_t::STATE_FAILED_EXPLORATION))
     {
         // If data is ready, then run an update of the exploration routine
-	//std::cout << "we are in while loop!" << std::endl;
         if(isReadyToUpdate())
         {
 	    std::cout << "Ready to update!" << std::endl;
@@ -180,8 +179,6 @@ void Exploration::executeStateMachine(void)
     } while(stateChanged);
 
     //if path confirmation was not received, resend path
-    std::cout << "pathReceived_: " << pathReceived_ << std::endl;
-    std::cout << "pre_path != cur_path? : " << (previousPath.path != currentPath_.path) << std::endl;
     if(!pathReceived_)
     {
         std::cout << "the current path was not received by motion_controller, attempting to send again:\n";
@@ -250,12 +247,9 @@ int8_t Exploration::executeExploringMap(bool initialize)
     *           explored more of the map.
     *       -- You will likely be able to see the frontier before actually reaching the end of the path leading to it.
     */
-    std::cout << "setting map" << std::endl;
     planner_.setMap(currentMap_);
-    std::cout << "finised setting map" << std::endl;
     frontiers_ = find_map_frontiers(currentMap_, currentPose_);
     currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
-    std::cout << "currentPath_ size: " << currentPath_.path.size() << std::endl;  
     /////////////////////////////// End student code ///////////////////////////////
     
     /////////////////////////   Create the status message    //////////////////////////

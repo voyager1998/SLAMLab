@@ -110,7 +110,6 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
 	    	pose_xyt_t goalpos;
             	goalpos.x = cell.x + xs[i];
             	goalpos.y = cell.y + ys[i];
-		std::cout << "start to plan path" << std::endl;
             	emptyPath = planner.planPath(robotPose, goalpos);
             	if (emptyPath.path_length > 1){
                     ispathfound = true;
