@@ -105,9 +105,9 @@ robot_path_t search_for_path(pose_xyt_t start,
     // cout << goalGrid.x << ' ' << goalGrid.y << endl;
     priority_queue<node, vector<node>, cmp> openSet;
     // vector<Point<int>> inOpen;
-    vector<vector<int>> inOpen(distances.widthInCells, vector<int>(distances.heightInCells, 0));
+    vector<vector<int>> inOpen(distances.widthInCells(), vector<int>(distances.heightInCells(), 0));
     // vector<Point<int>> closedSet;
-    vector<vector<int>> closedSet(distances.widthInCells, vector<int>(distances.heightInCells, 0));
+    vector<vector<int>> closedSet(distances.widthInCells(), vector<int>(distances.heightInCells(), 0));
     map<Point<int>, Point<int>> cameFrom;
     map<Point<int>, float> gScore;
     gScore[startGrid] = 0;
