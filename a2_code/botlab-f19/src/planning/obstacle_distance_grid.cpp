@@ -4,13 +4,17 @@
 #include <iostream>
 using namespace std;
 
-
 ObstacleDistanceGrid::ObstacleDistanceGrid(void)
-: width_(0)
-, height_(0)
-, metersPerCell_(0.05f)
-, cellsPerMeter_(20.0f)
+    : width_(0), height_(0), metersPerCell_(0.05f), cellsPerMeter_(20.0f)
 {
+}
+
+Point<int> ObstacleDistanceGrid::poseToCoor(pose_xyt_t pos) const
+{
+    Point<int> coor;
+    coor.x = (int)round((pos.x - globalOrigin_.x) / metersPerCell_);
+    coor.y = (int)round((pos.y - globalOrigin_.y) / metersPerCell_);
+    return coor;
 }
 
 
@@ -22,7 +26,6 @@ Point<int> ObstacleDistanceGrid::poseToCoor(pose_xyt_t pos) const
     return coor;
 }
 
-
 pose_xyt_t ObstacleDistanceGrid::coorTopose(Point<int> current) const
 {
     pose_xyt_t pos;
@@ -32,6 +35,7 @@ pose_xyt_t ObstacleDistanceGrid::coorTopose(Point<int> current) const
     pos.y = (float)(current.y * metersPerCell_ + globalOrigin_.y);
     return pos;
 }
+
 
 
 void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
@@ -72,29 +76,27 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
     }
 }
 
-
 bool ObstacleDistanceGrid::isCellInGrid(int x, int y) const
 {
     return (x >= 0) && (x < width_) && (y >= 0) && (y < height_);
 }
 
-
-void ObstacleDistanceGrid::resetGrid(const OccupancyGrid& map)
+void ObstacleDistanceGrid::resetGrid(const OccupancyGrid &map)
 {
     // Ensure the same cell sizes for both grid
     metersPerCell_ = map.metersPerCell();
     cellsPerMeter_ = map.cellsPerMeter();
     globalOrigin_ = map.originInGlobalFrame();
-    
+
     // If the grid is already the correct size, nothing needs to be done
-    if((width_ == map.widthInCells()) && (height_ == map.heightInCells()))
+    if ((width_ == map.widthInCells()) && (height_ == map.heightInCells()))
     {
         return;
     }
-    
+
     // Otherwise, resize the vector that is storing the data
     width_ = map.widthInCells();
     height_ = map.heightInCells();
-    
+
     cells_.resize(width_ * height_);
 }
