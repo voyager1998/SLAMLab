@@ -1,6 +1,8 @@
 #ifndef SLAM_SENSOR_MODEL_HPP
 #define SLAM_SENSOR_MODEL_HPP
 
+#include <slam/occupancy_grid_utils.hpp>
+
 class  lidar_t;
 class  OccupancyGrid;
 struct particle_t;
@@ -36,9 +38,12 @@ public:
     */
     double likelihood(const particle_t& particle, const lidar_t& scan, const OccupancyGrid& map);
 
+    double Gaussianlikelihood(const particle_t& particle, const lidar_t& scan, const OccupancyGrid& map);
+
 private:
     
-    ///////// TODO: Add any private members for your SensorModel ///////////////////
+    // Add any private members for your SensorModel
+    coordinate_convert coordinate_convert_;
 };
 
 #endif // SLAM_SENSOR_MODEL_HPP

@@ -97,7 +97,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     path.utime = start.utime;
     path.path.push_back(start);
     path.path_length = path.path.size();
-
+  
     Point<int> startGrid = distances.poseToCoor(start);
     Point<int> goalGrid = distances.poseToCoor(goal);
     // cout << "*******" << endl;
@@ -167,6 +167,7 @@ robot_path_t search_for_path(pose_xyt_t start,
             }
             float tentative_gScore = gScore[current] + distance_between_points(neighbor, current);
             if (gScore.find(neighbor) == gScore.end())
+
             {
                 gScore[neighbor] = numeric_limits<float>::infinity();
                 // gScore[neighbor] = 10000.0f;
@@ -182,13 +183,12 @@ robot_path_t search_for_path(pose_xyt_t start,
                     node pos;
                     pos.coor = neighbor;
                     pos.fs = fScore[neighbor];
-                    openSet.push(pos);
+                    openSet.push(pos)
                     // inOpen.push_back(neighbor);
                     inOpen[neighbor.x][neighbor.y] = 1;
                 }
             }
         }
     }
-
     return path;
 }

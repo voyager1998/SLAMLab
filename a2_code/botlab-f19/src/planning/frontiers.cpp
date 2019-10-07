@@ -6,7 +6,7 @@
 #include <queue>
 #include <set>
 #include <cassert>
-
+#include <vector>
 
 bool is_frontier_cell(int x, int y, const OccupancyGrid& map);
 frontier_t grow_frontier(Point<int> cell, const OccupancyGrid& map, std::set<Point<int>>& visitedFrontiers);
@@ -100,7 +100,28 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
     *       be able to drive straight to a frontier cell, but will need to drive somewhere close.
     */
     robot_path_t emptyPath;
-    
+    bool ispathfound = false;
+    std::vector<float> xs = {0.00, 0.00, 0.05, -0.05};
+    std::vector<float> ys = {0.05, -0.05, 0.00, 0.00};
+    for (auto frontier : frontiers) {
+        for (auto cell : frontier.cells) {
+            for(int i = 0; i < 4; ++i)
+            {
+	    	pose_xyt_t goalpos;
+            	goalpos.x = cell.x + xs[i];
+            	goalpos.y = cell.y + ys[i];
+		std::cout << "start to plan path" << std::endl;
+            	emptyPath = planner.planPath(robotPose, goalpos);
+            	if (emptyPath.path_length > 1){
+                    ispathfound = true;
+                    break;
+                }
+            }
+	    if(ispathfound) break;
+        }
+        if (ispathfound) break;
+    }
+    std::cout << "ispatfound? " << ispathfound << std::endl;
     return emptyPath;
 }
 

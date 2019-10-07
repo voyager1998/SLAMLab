@@ -55,7 +55,7 @@ public:
     
 private:
     
-    ////////// TODO: Add private member variables needed for you implementation ///////////////////
+    // Add private member variables needed for you implementation
     pose_xyt_t previous_odo;
     pose_xyt_t de_odo;
 };
