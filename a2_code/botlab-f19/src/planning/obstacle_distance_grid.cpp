@@ -32,7 +32,6 @@ pose_xyt_t ObstacleDistanceGrid::coorTopose(Point<int> current) const
 void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
 {
     resetGrid(map);
-    std::cout << "setting distances" << std::endl;    
     ///////////// TODO: Implement an algorithm to mark the distance to the nearest obstacle for every cell in the map.
     for (int i = 0; i < width_; i++) {
         for (int j = 0; j < height_; j++) {

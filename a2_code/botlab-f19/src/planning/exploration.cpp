@@ -247,9 +247,24 @@ int8_t Exploration::executeExploringMap(bool initialize)
     *           explored more of the map.
     *       -- You will likely be able to see the frontier before actually reaching the end of the path leading to it.
     */
-    planner_.setMap(currentMap_);
-    frontiers_ = find_map_frontiers(currentMap_, currentPose_);
-    currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
+    if(currentPath_.path.size() == 0)
+    {
+        frontiers_ = find_map_frontiers(currentMap_, currentPose_);
+    	planner_.setMap(currentMap_);
+    	currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
+    }
+    else
+    {
+    	auto target_pose = currentPath_.path.end()--;
+    	float dis = distance_between_points(Point<float>(currentPose_.x, currentPose_.y),
+		   	 Point<float>(target_pose->x, target_pose->y));
+    	if(dis < 0.1)
+   	{
+        	frontiers_ = find_map_frontiers(currentMap_, currentPose_);
+		planner_.setMap(currentMap_);
+    		currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
+   	 }
+    }    
     /////////////////////////////// End student code ///////////////////////////////
     
     /////////////////////////   Create the status message    //////////////////////////
