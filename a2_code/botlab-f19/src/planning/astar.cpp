@@ -61,16 +61,29 @@ robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> c
     }
     total_path.path[total_path.path_length - 1].theta = 0.0f;
     // total_path.path[0] = start;
+
+    robot_path_t new_path;
+    new_path.path.push_back(total_path.path[0]);
+    if (total_path.path_length > 2) {
+    	for (int i = 1; i < total_path.path_length-1;i++){
+		if (abs(total_path.path[i].theta - total_path.path[i-1].theta) > 0.1){
+			 new_path.path.push_back(total_path.path[i]);
+	            }
+	 }
+	 new_path.path.push_back(goal);
+	 new_path.path_length = new_path.path.size();
+	 return new_path;
+    } else
     return total_path;
 }
 
 float heuristic(Point<int> a, Point<int> b)
 {
     srand(time(NULL));
-    // float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-    // return euclideanDist;
-    float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y) + ((double)rand() / (RAND_MAX));
-    return manhattanDist;
+    float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+    return euclideanDist;
+    // float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y) + ((double)rand() / (RAND_MAX));
+    // return manhattanDist;
 }
 
 bool inContainer(vector<Point<int>> ctn, Point<int> item)
@@ -150,7 +163,7 @@ robot_path_t search_for_path(pose_xyt_t start,
             neighbor.y = current.y + ny[i];
             if (!distances.isCellInGrid(neighbor.x, neighbor.y))
                 continue;
-            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + 0.2)
+            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + 0.3)
             {
                 neighbors.push_back(neighbor);
             }

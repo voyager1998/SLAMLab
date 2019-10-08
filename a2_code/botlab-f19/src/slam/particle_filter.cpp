@@ -8,7 +8,7 @@
 #define RESAMPLEPORTION 0.8
 #define ITERATIONS 5
 #define STARTITER 3
-#define USEGAUSSIAN
+// #define USEGAUSSIAN
 // #define USEITERATIVE
 // #define RANDOMINIT
 using namespace std;

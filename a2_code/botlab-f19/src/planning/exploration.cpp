@@ -250,20 +250,32 @@ int8_t Exploration::executeExploringMap(bool initialize)
     if(currentPath_.path.size() == 0)
     {
         frontiers_ = find_map_frontiers(currentMap_, currentPose_);
-    	planner_.setMap(currentMap_);
-    	currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
+	if(frontiers_.size() > 0)
+	{
+    	    planner_.setMap(currentMap_);
+    	    currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
+	}
+	else
+	    std::cout << "No frontiers left! "  << std::endl;
     }
     else
     {
-    	auto target_pose = currentPath_.path.end()--;
+    	auto target_pose = --currentPath_.path.end();
     	float dis = distance_between_points(Point<float>(currentPose_.x, currentPose_.y),
 		   	 Point<float>(target_pose->x, target_pose->y));
-    	if(dis < 0.1)
+	std::cout << "current distance to target: " << dis << std::endl;
+	if(dis < 0.15)
    	{
-        	frontiers_ = find_map_frontiers(currentMap_, currentPose_);
-		planner_.setMap(currentMap_);
-    		currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
-   	 }
+        	usleep(1000000);	
+		frontiers_ = find_map_frontiers(currentMap_, currentPose_);
+		if(frontiers_.size() > 0)
+		{
+    	    	    planner_.setMap(currentMap_);
+    	    	    currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
+		}
+		else
+	    	    std::cout << "No frontiers left! "  << std::endl;   		
+       	}
     }    
     /////////////////////////////// End student code ///////////////////////////////
     
