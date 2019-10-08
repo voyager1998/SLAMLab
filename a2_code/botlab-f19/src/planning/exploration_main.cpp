@@ -35,6 +35,7 @@ int main(int argc, char** argv)
     explorationComplete=false;
 
     // Launch the exploration thread
+    std::cout << "start thread" << std::endl;
 
     std::thread exploreThread([&exploration, &explorationComplete]() {
         bool success = exploration.exploreEnvironment();
@@ -42,7 +43,8 @@ int main(int argc, char** argv)
 
         std::cout << "Exploration thread complete: " << (success ? "SUCCESS!" : "FAILED!") << '\n';
     });
-
+    std::cout << "end creating thread" << std::endl;
+    
     // Handle LCM messages until exploration is finished
     while(!explorationComplete)
     {

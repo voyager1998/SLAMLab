@@ -25,6 +25,7 @@ ParticleFilter::ParticleFilter(int numParticles)
     : kNumParticles_(numParticles) {
     assert(kNumParticles_ > 1);
     posterior_.resize(kNumParticles_);
+    posteriorPose_.x = posteriorPose_.y = posteriorPose_.theta = 0.0;
 }
 
 void ParticleFilter::initializeFilterAtPose(const pose_xyt_t& pose, const OccupancyGrid& map) {
