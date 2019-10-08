@@ -52,7 +52,9 @@ public:
     * \return   New sample based on distribution from the motion model at the current update.
     */
     particle_t applyAction(const particle_t& sample);
-    
+
+    pose_xyt_t showDeltaOdometry(void) { return de_odo; }
+
 private:
     
     // Add private member variables needed for you implementation

@@ -255,13 +255,12 @@ void OccupancyGridSLAM::updateLocalization(void)
 
         lcm_.publish(SLAM_POSE_CHANNEL, &currentPose_);
 #ifdef DEBUG
-	for (int i=0; i< particles.num_particles;i++){
-	    particles.particles[i].weight = 1.0/particles.num_particles;
-	}
-#endif 
-	lcm_.publish(SLAM_PARTICLES_CHANNEL, &particles);
-	
-   }
+        for (int i = 0; i < particles.num_particles; i++) {
+            particles.particles[i].weight = 1.0 / particles.num_particles;
+        }
+#endif
+        lcm_.publish(SLAM_PARTICLES_CHANNEL, &particles);
+    }
 }
 
 
