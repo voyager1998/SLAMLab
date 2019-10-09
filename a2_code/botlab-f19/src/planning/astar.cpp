@@ -146,8 +146,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     while (!openSet.empty())
     {
         Point<int> current = openSet.top().coor;
-        if (current == goalGrid)
-        {
+        if (abs(current.x - goalGrid.x) < DENSITY && abs(current.y - goalGrid.y) < DENSITY) {
             return reconstruct_path(cameFrom, current, distances, start, goal);
         }
         // closedSet.push_back(current);
