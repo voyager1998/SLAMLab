@@ -29,6 +29,7 @@ Exploration::Exploration(int32_t teamNumber,
 , haveHomePose_(false)
 , lcmInstance_(lcmInstance)
 , pathReceived_(false)
+, startReturningHome(false)
 {
     assert(lcmInstance_);   // confirm a nullptr wasn't passed in
     
@@ -334,9 +335,12 @@ int8_t Exploration::executeReturningHome(bool initialize)
     *       (1) dist(currentPose_, targetPose_) < kReachedPositionThreshold  :  reached the home pose
     *       (2) currentPath_.path_length > 1  :  currently following a path to the home pose
     */
-    
-
-
+    if(!startReturningHome)
+    {
+	planner_.setMap(currentMap_);
+	currentPath_ = planner_.planPath(currentPose_, homePose_);
+	startReturningHome = true;
+    }
     /////////////////////////////// End student code ///////////////////////////////
     
     /////////////////////////   Create the status message    //////////////////////////
