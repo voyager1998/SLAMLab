@@ -9,6 +9,8 @@
 #include <time.h>
 #include <stdlib.h>
 using namespace std;
+#define THRESHOLD 0.15
+#define DENSITY 4
 
 struct node
 {
@@ -96,7 +98,7 @@ bool inContainer(vector<Point<int>> ctn, Point<int> item)
     return res;
 }
 
-int density = 1;
+int density = DENSITY;
 vector<int> nx = {density, -density, 0, 0, density, density, -density, -density};
 vector<int> ny = {0, 0, density, -density, density, -density, density, -density};
 
@@ -170,8 +172,7 @@ robot_path_t search_for_path(pose_xyt_t start,
             neighbor.y = current.y + ny[i];
             if (!distances.isCellInGrid(neighbor.x, neighbor.y))
                 continue;
-            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + 0.3)
-            {
+            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + THRESHOLD) {
                 neighbors.push_back(neighbor);
             }
         }
