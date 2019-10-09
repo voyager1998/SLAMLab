@@ -9,6 +9,8 @@
 #include <time.h>
 #include <stdlib.h>
 using namespace std;
+#define THRESHOLD 0.15
+#define DENSITY 4
 
 struct node
 {
@@ -96,8 +98,9 @@ bool inContainer(vector<Point<int>> ctn, Point<int> item)
     return res;
 }
 
-vector<int> nx = {1, -1, 0, 0, 1, 1, -1, -1};
-vector<int> ny = {0, 0, 1, -1, 1, -1, 1, -1};
+int density = DENSITY;
+vector<int> nx = {density, -density, 0, 0, density, density, -density, -density};
+vector<int> ny = {0, 0, density, -density, density, -density, density, -density};
 
 robot_path_t search_for_path(pose_xyt_t start,
                              pose_xyt_t goal,
@@ -107,6 +110,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     ////////////////// TODO: Implement your A* search here //////////////////////////
 
     // std::cout <<  "#################################" << std::endl;
+    std::cout << start.x << " " << start.y << std::endl;
     robot_path_t path;
     path.utime = start.utime;
     path.path.push_back(start);
@@ -114,6 +118,11 @@ robot_path_t search_for_path(pose_xyt_t start,
   
     Point<int> startGrid = distances.poseToCoor(start);
     Point<int> goalGrid = distances.poseToCoor(goal);
+
+    if (!distances.isCellInGrid(startGrid.x, startGrid.y) || !distances.isCellInGrid(goalGrid.x, goalGrid.y)){
+        std::cout << "Start or Goal is invalid!" << std::endl;
+        return path;
+    }
     // cout << "*******" << endl;
     // cout << startGrid.x << ' ' << startGrid.y << endl;
     // cout << goalGrid.x << ' ' << goalGrid.y << endl;
@@ -132,6 +141,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     pos.fs = fScore[startGrid];
     openSet.push(pos);
     // inOpen.push_back(startGrid);
+    std::cout << startGrid.x << " " << startGrid.y << std::endl;
     inOpen[startGrid.x][startGrid.y] = 1;
     while (!openSet.empty())
     {
@@ -162,8 +172,7 @@ robot_path_t search_for_path(pose_xyt_t start,
             neighbor.y = current.y + ny[i];
             if (!distances.isCellInGrid(neighbor.x, neighbor.y))
                 continue;
-            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + 0.3)
-            {
+            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + THRESHOLD) {
                 neighbors.push_back(neighbor);
             }
         }
