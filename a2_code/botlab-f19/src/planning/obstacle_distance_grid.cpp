@@ -17,15 +17,6 @@ Point<int> ObstacleDistanceGrid::poseToCoor(pose_xyt_t pos) const
     return coor;
 }
 
-
-Point<int> ObstacleDistanceGrid::poseToCoor(pose_xyt_t pos) const
-{
-    Point<int> coor;
-    coor.x = (int)round((pos.x - globalOrigin_.x) / metersPerCell_);
-    coor.y = (int)round((pos.y - globalOrigin_.y) / metersPerCell_);
-    return coor;
-}
-
 pose_xyt_t ObstacleDistanceGrid::coorTopose(Point<int> current) const
 {
     pose_xyt_t pos;

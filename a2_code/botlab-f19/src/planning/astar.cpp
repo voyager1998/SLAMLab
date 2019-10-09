@@ -183,7 +183,7 @@ robot_path_t search_for_path(pose_xyt_t start,
                     node pos;
                     pos.coor = neighbor;
                     pos.fs = fScore[neighbor];
-                    openSet.push(pos)
+                    openSet.push(pos);
                     // inOpen.push_back(neighbor);
                     inOpen[neighbor.x][neighbor.y] = 1;
                 }
