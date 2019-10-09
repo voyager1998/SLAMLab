@@ -68,6 +68,7 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
     }
 #else
     pointVec points;
+    std::cout << "Begin to go through all cells" << std::endl;
     for (int j = 0; j < height_; j++) {
         for (int i = 0; i < width_; i++) {
             cells_[cellIndex(i, j)] = 999;
@@ -85,6 +86,7 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
             }
         }
     }
+    std::cout << "Num of Considered obstables: " << points.size() << std::endl;
     if (points.size() > 0) {
         std::cout << "start KDTree" << std::endl;
         KDTree tree(points);
