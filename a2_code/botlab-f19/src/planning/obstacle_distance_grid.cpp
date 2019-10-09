@@ -2,6 +2,7 @@
 #include <slam/occupancy_grid.hpp>
 #include <limits>
 #include <iostream>
+#include "KDTree.hpp"
 using namespace std;
 
 ObstacleDistanceGrid::ObstacleDistanceGrid(void)
@@ -34,36 +35,78 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
     resetGrid(map);
     std::cout << "setting distances" << std::endl;    
     ///////////// TODO: Implement an algorithm to mark the distance to the nearest obstacle for every cell in the map.
+    // ******* naive *******
+    // for (int i = 0; i < width_; i++) {
+    //     for (int j = 0; j < height_; j++) {
+    //         cells_[cellIndex(i, j)] = 999;
+    //     }
+    // }
+    // vector<pair<int, int>> occupied;
+    // for (int i = 0; i < width_; i++) {
+    //     for (int j = 0; j < height_; j++) {
+    //         if (map.logOdds(i, j) > 0) {
+    //             bool ignore = false;
+    //             if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) {
+    //                 ignore = true;
+    //                 cells_[cellIndex(i, j)] = 0;
+    //             }
+    //             if (!ignore) occupied.push_back(make_pair(i, j));
+    //         }
+    //     }   
+    // }
+    // // for (auto i : occupied) cout << i.first << ' ' << i.second << endl;
+    // for (int i = 0; i < width_; i++) {
+    //     for (int j = 0; j < height_; j++) {
+    //         float dis = 10000.f;
+    //         for (size_t s = 0; s < occupied.size(); s++) {
+    //             float d = sqrt((i - occupied[s].first) * (i - occupied[s].first) + (j - occupied[s].second) * (j - occupied[s].second));
+    //             if (d < dis) dis = d;
+    //         }
+    //         // cout << dis << endl;
+    //         if (cells_[cellIndex(i, j)] != 0)
+    //             cells_[cellIndex(i, j)] = dis / 10;
+    //     }    
+    // }
+    // ******* kd tree *******
+    // need to update cells_[cellIndex(i, j)], has map.logOdds
+    pointVec points;
     for (int i = 0; i < width_; i++) {
         for (int j = 0; j < height_; j++) {
             cells_[cellIndex(i, j)] = 999;
-        }
-    }
-    vector<pair<int, int>> occupied;
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
             if (map.logOdds(i, j) > 0) {
                 bool ignore = false;
                 if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) {
                     ignore = true;
                     cells_[cellIndex(i, j)] = 0;
                 }
-                if (!ignore) occupied.push_back(make_pair(i, j));
+                if (!ignore) {
+                    point_t pt;
+                    pt = {(double)i, (double)j};
+                    points.push_back(pt);
+                }
             }
         }   
     }
-    // for (auto i : occupied) cout << i.first << ' ' << i.second << endl;
+    if (points.size() > 0) {
+    std::cout << "start KDTree" << std::endl;
+    KDTree tree(points);
     for (int i = 0; i < width_; i++) {
         for (int j = 0; j < height_; j++) {
-            float dis = 10000.f;
-            for (size_t s = 0; s < occupied.size(); s++) {
-                float d = sqrt((i - occupied[s].first) * (i - occupied[s].first) + (j - occupied[s].second) * (j - occupied[s].second));
-                if (d < dis) dis = d;
+            if (cells_[cellIndex(i, j)] != 0) {
+                point_t pt;
+                pt = {(double)i, (double)j};
+                auto res = tree.nearest_point(pt);
+                // if (res.size() < 2) {
+                //     // std::cout << "!!!!!" << std::endl;
+                //     cells_[cellIndex(i, j)] = 0;
+                // }
+                // else {
+                cells_[cellIndex(i, j)] = (float)sqrt((i - (int)res[0])*(i - (int)res[0])+(j - (int)res[1])*(j - (int)res[1]))/10.0;
+                // }
             }
-            // cout << dis << endl;
-            if (cells_[cellIndex(i, j)] != 0)
-                cells_[cellIndex(i, j)] = dis / 10;
-        }    
+        }
+    }
+    std::cout << "end KDTree" << std::endl;
     }
 }
 
