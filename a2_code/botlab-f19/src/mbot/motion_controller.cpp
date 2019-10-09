@@ -74,7 +74,7 @@ public:
         const float kPTurnGain = 0.4f;
         const float kDesiredSpeed = 0.2f;
         const float kMinSpeed = 0.1f;
-        const float kTurnSpeed = 1.0f;
+        const float kTurnSpeed = 0.3f;
         const float kTurnMaxSpeed = 0.6f;
         const float slowDownDistance = 0.4f;
         
@@ -123,7 +123,7 @@ public:
                         turnspeed = -kTurnSpeed;
                     }
 
-                    if (std::abs(error) < 0.5) {
+                    /*if (std::abs(error) < 0.5) {
                         // kick in PID close to end
                         double deltaError = error - lastError_;
                         totalError_ += error;
@@ -131,11 +131,11 @@ public:
 
                         turnspeed = (error * kPGain) + (deltaError * kDGain) + (totalError_ * kIGain);
                         if (turnspeed >= 0) {
-                            turnspeed = std::min(turnspeed+0.1f, kTurnMaxSpeed);
+                            turnspeed = std::min(turnspeed+0.0f, kTurnMaxSpeed);
                         } else {
-                            turnspeed = std::max(-turnspeed-0.1f, -kTurnMaxSpeed);
+                            turnspeed = std::max(-turnspeed-0.0f, -kTurnMaxSpeed);
                         }
-                    }
+                    }*/
 
                     // Turn left if the target is to the left
                     if(error > 0.0)
