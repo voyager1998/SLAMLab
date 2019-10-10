@@ -13,8 +13,8 @@ ObstacleDistanceGrid::ObstacleDistanceGrid(void)
 Point<int> ObstacleDistanceGrid::poseToCoor(pose_xyt_t pos) const
 {
     Point<int> coor;
-    coor.x = (int)round((pos.x - globalOrigin_.x) / metersPerCell_);
-    coor.y = (int)round((pos.y - globalOrigin_.y) / metersPerCell_);
+    coor.x = static_cast<int>((pos.x - globalOrigin_.x) / metersPerCell_);
+    coor.y = static_cast<int>((pos.y - globalOrigin_.y) / metersPerCell_);
     return coor;
 }
 
@@ -28,61 +28,75 @@ pose_xyt_t ObstacleDistanceGrid::coorTopose(Point<int> current) const
     return pos;
 }
 
-
-
-void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
+void ObstacleDistanceGrid::setDistances(const OccupancyGrid &map)
 {
     resetGrid(map);
     std::cout << "Map, meters per cell: " << map.metersPerCell() << std::endl;
 #ifndef USEKDTREE
     ///////////// TODO: Implement an algorithm to mark the distance to the nearest obstacle for every cell in the map.
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
+    for (int i = 0; i < width_; i++)
+    {
+        for (int j = 0; j < height_; j++)
+        {
             cells_[cellIndex(i, j)] = 999;
         }
     }
     vector<pair<int, int>> occupied;
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
-            if (map.logOdds(i, j) > 0) {
+    for (int i = 0; i < width_; i++)
+    {
+        for (int j = 0; j < height_; j++)
+        {
+            if (map.logOdds(i, j) > 0)
+            {
                 bool ignore = false;
-                if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) {
+                if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0)
+                {
                     ignore = true;
                     cells_[cellIndex(i, j)] = 0;
                 }
-                if (!ignore) occupied.push_back(make_pair(i, j));
+                if (!ignore)
+                    occupied.push_back(make_pair(i, j));
             }
-        }   
+        }
     }
     // for (auto i : occupied) cout << i.first << ' ' << i.second << endl;
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
+    for (int i = 0; i < width_; i++)
+    {
+        for (int j = 0; j < height_; j++)
+        {
             float dis = 10000.f;
-            for (size_t s = 0; s < occupied.size(); s++) {
+            for (size_t s = 0; s < occupied.size(); s++)
+            {
                 float d = sqrt((i - occupied[s].first) * (i - occupied[s].first) + (j - occupied[s].second) * (j - occupied[s].second));
-                if (d < dis) dis = d;
+                if (d < dis)
+                    dis = d;
             }
             // cout << dis << endl;
             if (cells_[cellIndex(i, j)] != 0)
                 cells_[cellIndex(i, j)] = dis / 10;
-        }    
+        }
     }
 #else
     pointVec points;
     std::cout << "Begin to go through all cells to construct Distance Grid." << std::endl;
-    for (int j = 0; j < height_; j++) {
-        for (int i = 0; i < width_; i++) {
+    for (int j = 0; j < height_; j++)
+    {
+        for (int i = 0; i < width_; i++)
+        {
             cells_[cellIndex(i, j)] = 999;
-            if (map.logOdds(i, j) > 0) {
+            if (map.logOdds(i, j) >= 0)
+            {
                 cells_[cellIndex(i, j)] = 0;
                 bool ignore = false;
-                if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) {
+                if (map.logOdds(i - 1, j) >= 0 && map.logOdds(i + 1, j) >= 0 && map.logOdds(i, j - 1) >= 0 && map.logOdds(i, j + 1) >= 0)
+                {
                     ignore = true;
                     // cells_[cellIndex(i, j)] = 0;
                 }
                 // if(map.logOdds(i, j) == 0)
                 //     ignore = true;
-                if (!ignore) {
+                if (!ignore)
+                {
                     point_t pt;
                     pt = {(double)i, (double)j};
                     points.push_back(pt);
@@ -91,12 +105,16 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
         }
     }
     std::cout << "Num of Considered obstables: " << points.size() << std::endl;
-    if (points.size() > 0) {
+    if (points.size() > 0)
+    {
         std::cout << "start KDTree" << std::endl;
         KDTree tree(points);
-        for (int j = 0; j < height_; j++) {
-            for (int i = 0; i < width_; i++) {
-                if (cells_[cellIndex(i, j)] != 0 /*&& map.logOdds(i, j) < 0*/) {
+        for (int j = 0; j < height_; j++)
+        {
+            for (int i = 0; i < width_; i++)
+            {
+                if (cells_[cellIndex(i, j)] != 0 /*&& map.logOdds(i, j) < 0*/)
+                {
                     point_t pt;
                     pt = {(double)i, (double)j};
                     auto res = tree.nearest_point(pt);
@@ -105,7 +123,7 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
                     //     cells_[cellIndex(i, j)] = 0;
                     // }
                     // else {
-                    cells_[cellIndex(i, j)] = (float)sqrt((i - (int)res[0]) * (i - (int)res[0]) + (j - (int)res[1]) * (j - (int)res[1])) * map.metersPerCell();  // / 10.0;
+                    cells_[cellIndex(i, j)] = (float)sqrt((i - (int)res[0]) * (i - (int)res[0]) + (j - (int)res[1]) * (j - (int)res[1])) * map.metersPerCell(); // / 10.0;
                     // }
                 }
             }

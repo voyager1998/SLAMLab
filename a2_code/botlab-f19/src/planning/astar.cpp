@@ -52,29 +52,41 @@ robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> c
     {
         float dx = total_path.path[i + 1].x - total_path.path[i].x;
         float dy = total_path.path[i + 1].y - total_path.path[i].y;
-        if (dx == 0 && dy < 0) total_path.path[i].theta = -M_PI / 2;
-        if (dx == 0 && dy > 0) total_path.path[i].theta = M_PI / 2;
-        if (dy == 0 && dx < 0) total_path.path[i].theta = -M_PI;
-        if (dy == 0 && dx > 0) total_path.path[i].theta = 0;
-        if (dx < 0 && dy < 0) total_path.path[i].theta = -M_PI + atan2(-dy, -dx);
-        if (dx < 0 && dy > 0) total_path.path[i].theta = M_PI - atan2(dy, -dx);
-        if (dx > 0 && dy < 0) total_path.path[i].theta = -atan2(-dy, dx);
-        if (dx > 0 && dy > 0) total_path.path[i].theta = atan2(dy, dx);
+        if (dx == 0 && dy < 0)
+            total_path.path[i].theta = -M_PI / 2;
+        if (dx == 0 && dy > 0)
+            total_path.path[i].theta = M_PI / 2;
+        if (dy == 0 && dx < 0)
+            total_path.path[i].theta = -M_PI;
+        if (dy == 0 && dx > 0)
+            total_path.path[i].theta = 0;
+        if (dx < 0 && dy < 0)
+            total_path.path[i].theta = -M_PI + atan2(-dy, -dx);
+        if (dx < 0 && dy > 0)
+            total_path.path[i].theta = M_PI - atan2(dy, -dx);
+        if (dx > 0 && dy < 0)
+            total_path.path[i].theta = -atan2(-dy, dx);
+        if (dx > 0 && dy > 0)
+            total_path.path[i].theta = atan2(dy, dx);
     }
     total_path.path[total_path.path_length - 1].theta = 0.0f;
 
     robot_path_t new_path;
     new_path.path.push_back(total_path.path[0]);
-    if (total_path.path_length > 2) {
-    	for (int i = 1; i < total_path.path_length-1;i++){
-		if (abs(total_path.path[i].theta - total_path.path[i-1].theta) > 0.1){
-			new_path.path.push_back(total_path.path[i]);
-	    }
-	}
-	new_path.path.push_back(goal);
-	new_path.path_length = new_path.path.size();
-	return new_path;
-    }else
+    if (total_path.path_length > 2)
+    {
+        for (int i = 1; i < total_path.path_length - 1; i++)
+        {
+            if (abs(total_path.path[i].theta - total_path.path[i - 1].theta) > 0.1)
+            {
+                new_path.path.push_back(total_path.path[i]);
+            }
+        }
+        new_path.path.push_back(goal);
+        new_path.path_length = new_path.path.size();
+        return new_path;
+    }
+    else
         return total_path;
 }
 
@@ -115,11 +127,12 @@ robot_path_t search_for_path(pose_xyt_t start,
     path.utime = start.utime;
     path.path.push_back(start);
     path.path_length = path.path.size();
-  
+
     Point<int> startGrid = distances.poseToCoor(start);
     Point<int> goalGrid = distances.poseToCoor(goal);
 
-    if (!distances.isCellInGrid(startGrid.x, startGrid.y) || !distances.isCellInGrid(goalGrid.x, goalGrid.y)){
+    if (!distances.isCellInGrid(startGrid.x, startGrid.y) || !distances.isCellInGrid(goalGrid.x, goalGrid.y))
+    {
         std::cout << "Start or Goal is invalid!" << std::endl;
         return path;
     }
@@ -146,11 +159,13 @@ robot_path_t search_for_path(pose_xyt_t start,
     while (!openSet.empty())
     {
         Point<int> current = openSet.top().coor;
-        if (closedSet[current.x][current.y] == 1) {
+        if (inOpen[current.x][current.y] == 0)
+        {
             openSet.pop();
             continue;
         }
-        if (abs(current.x - goalGrid.x) < DENSITY && abs(current.y - goalGrid.y) < DENSITY) {
+        if (abs(current.x - goalGrid.x) < DENSITY && abs(current.y - goalGrid.y) < DENSITY)
+        {
             return reconstruct_path(cameFrom, current, distances, start, goal);
         }
         // closedSet.push_back(current);
@@ -175,7 +190,8 @@ robot_path_t search_for_path(pose_xyt_t start,
             neighbor.y = current.y + ny[i];
             if (!distances.isCellInGrid(neighbor.x, neighbor.y))
                 continue;
-            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + THRESHOLD) {
+            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + distances.metersPerCell + THRESHOLD)
+            {
                 neighbors.push_back(neighbor);
             }
         }
@@ -191,7 +207,12 @@ robot_path_t search_for_path(pose_xyt_t start,
                 gScore[current] = numeric_limits<float>::infinity();
                 // gScore[current] = 10000.0f;
             }
-            float tentative_gScore = gScore[current] + distance_between_points(neighbor, current);
+            float dis = 0.0f;
+            if (distances(neighbor.x, neighbor.y) < params.maxDistanceWithCost)
+            {
+                dis = pow(params.maxDistanceWithCost - distances(neighbor.x, neighbor.y), params.distanceCostExponent);
+            }
+            float tentative_gScore = gScore[current] + dis; // distance_between_points(neighbor, current);
             if (gScore.find(neighbor) == gScore.end())
             {
                 gScore[neighbor] = numeric_limits<float>::infinity();
@@ -205,12 +226,12 @@ robot_path_t search_for_path(pose_xyt_t start,
                 // if (!inContainer(inOpen, neighbor))
                 // if (inOpen[neighbor.x][neighbor.y] == 0)
                 // {
-                    node pos;
-                    pos.coor = neighbor;
-                    pos.fs = fScore[neighbor];
-                    openSet.push(pos);
-                    // inOpen.push_back(neighbor);
-                    inOpen[neighbor.x][neighbor.y] = 1;
+                node pos;
+                pos.coor = neighbor;
+                pos.fs = fScore[neighbor];
+                openSet.push(pos);
+                // inOpen.push_back(neighbor);
+                inOpen[neighbor.x][neighbor.y] = 1;
                 // }
             }
         }
