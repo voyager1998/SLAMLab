@@ -67,14 +67,14 @@ public:
     {
         //////////// TODO: Implement your feedback controller here. //////////////////////
         
-        const float kPGain = 0.27f;
+        const float kPGain = 0.3f;
         const float kDGain = 0.0f;
-        const float kIGain = 0.0003f;
+        const float kIGain = 0.1f;
 
         const float kPTurnGain = 0.4f;
         const float kDesiredSpeed = 0.2f;
         const float kMinSpeed = 0.1f;
-        const float kTurnSpeed = 1.0f;
+        const float kTurnSpeed = 0.3f;
         const float kTurnMaxSpeed = 0.6f;
         const float slowDownDistance = 0.4f;
         
@@ -123,7 +123,7 @@ public:
                         turnspeed = -kTurnSpeed;
                     }
 
-                    if (std::abs(error) < 0.5) {
+                    /*if (std::abs(error) < 0.5) {
                         // kick in PID close to end
                         double deltaError = error - lastError_;
                         totalError_ += error;
@@ -131,11 +131,11 @@ public:
 
                         turnspeed = (error * kPGain) + (deltaError * kDGain) + (totalError_ * kIGain);
                         if (turnspeed >= 0) {
-                            turnspeed = std::min(turnspeed, kTurnMaxSpeed);
+                            turnspeed = std::min(turnspeed+0.0f, kTurnMaxSpeed);
                         } else {
-                            turnspeed = std::max(-turnspeed, -kTurnMaxSpeed);
+                            turnspeed = std::max(-turnspeed-0.0f, -kTurnMaxSpeed);
                         }
-                    }
+                    }*/
 
                     // Turn left if the target is to the left
                     if(error > 0.0)

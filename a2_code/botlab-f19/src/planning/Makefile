@@ -7,6 +7,7 @@ LIBDEPS  = $(call libdeps, $(LDFLAGS))
 LIB_PLANNING = $(LIB_PATH)/libplanning.a
 LIBPLANNING_OBJS = \
 	motion_planner.o \
+	KDTree.o \
 	obstacle_distance_grid.o \
 	astar.o \
 	frontiers.o

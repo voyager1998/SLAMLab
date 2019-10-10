@@ -1,6 +1,7 @@
 #include <slam/occupancy_grid_utils.hpp>
 #include <common/grid_utils.hpp>
 #include <cmath>
+#include <iostream>
 
 coordinate_convert::coordinate_convert()
 {
@@ -18,12 +19,12 @@ ray_coordinates coordinate_convert::get_ray_coordinates(const adjusted_ray_t& ra
 
     coordinate start_coor = get_coordinate(ray.origin, map_);
     coordinate end_coor = get_coordinate(get_end_pt(ray), map_);
-    
+          
     int x0 = start_coor.x;
     int y0 = start_coor.y;
     int x1 = end_coor.x;
     int y1 = end_coor.y;
-
+    //std::cout << ray.origin.x << " " << ray.origin.y << "  " << get_end_pt(ray).x << " " << get_end_pt(ray).y << std::endl; 
     int dx = end_coor.x - start_coor.x;
     int dy = end_coor.y - start_coor.y;
     int step_x, step_y;

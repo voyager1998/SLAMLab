@@ -6,6 +6,8 @@
 #include <cassert>
 #include <chrono>
 
+#define DEBUG
+
 OccupancyGridSLAM::OccupancyGridSLAM(int         numParticles,
                                      int8_t      hitOddsIncrease,
                                      int8_t      missOddsDecrease,
@@ -70,7 +72,7 @@ void OccupancyGridSLAM::runSLAM(void)
         if(isReadyToUpdate())
         {
             // Then run an iteration of our SLAM algorithm
-            runSLAMIteration();
+	    runSLAMIteration();
         }
         // Otherwise, do a quick spin while waiting for data rather than using more complicated condition variable.
         else
@@ -85,7 +87,6 @@ void OccupancyGridSLAM::runSLAM(void)
 void OccupancyGridSLAM::handleLaser(const lcm::ReceiveBuffer* rbuf, const std::string& channel, const lidar_t* scan)
 {
     const int kNumIgnoredForMessage = 10;   // number of scans to ignore before printing a message about odometry
-//std::cout << "laser!\n";    
     std::lock_guard<std::mutex> autoLock(dataMutex_);
     // Ignore scans until odometry data arrives -- need odometry before a scan to safely built the map
     bool haveOdom = (mode_ != mapping_only) // For full SLAM, odometry data is needed.
@@ -94,7 +95,6 @@ void OccupancyGridSLAM::handleLaser(const lcm::ReceiveBuffer* rbuf, const std::s
     bool havePose = (mode_ == mapping_only) // For mapping-only, ground-truth poses are needed
         && !groundTruthPoses_.empty() 
         && (groundTruthPoses_.front().utime <= scan->times.front());
-    
     // If there's appropriate odometry or pose data for this scan, then add it to the queue.
     if(haveOdom || havePose)
     {
@@ -251,13 +251,16 @@ void OccupancyGridSLAM::updateLocalization(void)
     {
         previousPose_ = currentPose_;
         currentPose_  = filter_.updateFilter(currentOdometry_, currentScan_, map_);//, v_, omega_, utime_); //remove last 3 args for odo
-        
         auto particles = filter_.particles();
 
         lcm_.publish(SLAM_POSE_CHANNEL, &currentPose_);
+#ifdef DEBUG
+        for (int i = 0; i < particles.num_particles; i++) {
+            particles.particles[i].weight = 1.0 / particles.num_particles;
+        }
+#endif
         lcm_.publish(SLAM_PARTICLES_CHANNEL, &particles);
-
-   }
+    }
 }
 
 

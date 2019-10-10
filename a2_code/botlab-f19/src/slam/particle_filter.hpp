@@ -89,6 +89,9 @@ private:
                                                        const lidar_t& laser,
                                                        const OccupancyGrid&   map);
     pose_xyt_t estimatePosteriorPose(const std::vector<particle_t>& posterior);
+
+    std::vector<particle_t> PosteriorGenerater(const lidar_t& laser,
+                                                const OccupancyGrid& map);
 };
 
 #endif // SLAM_PARTICLE_FILTER_HPP

@@ -2,7 +2,7 @@
 #include <slam/occupancy_grid.hpp>
 #include <common/grid_utils.hpp>
 #include <numeric>
-
+#include <iostream>
 
 Mapping::Mapping(float maxLaserDistance, int8_t hitOdds, int8_t missOdds)
 : kMaxLaserDistance_(maxLaserDistance)
@@ -18,14 +18,16 @@ void Mapping::updateMap(const lidar_t& scan, const pose_xyt_t& pose, OccupancyGr
     if(!initialized_)
     {
         previousPose_ = pose;
+	initialized_ = true;
     }
-    
     MovingLaserScan movingScan(scan, previousPose_, pose);
     for(auto i = movingScan.begin(); i < movingScan.end(); i++)
     {
         updateEndpoint(*i, map);
         updateRay(*i, map);
+  
     }
+    previousPose_ = pose;
     //////////////// TODO: Implement your occupancy grid algorithm here ///////////////////////
 }
 
@@ -54,7 +56,7 @@ void Mapping::decreaseCellOdds(int x, int y, OccupancyGrid& map)
     if(cur_odds - (int)kMissOdds_ < -127)
         map.setLogOdds(x, y, -127);
     else    
-        map.setLogOdds(x, y, cur_odds - kMissOdds_);
+        map.setLogOdds(x, y, map.logOdds(x, y) - kMissOdds_);
 }
 
 
