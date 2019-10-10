@@ -6,9 +6,12 @@
 #include <math.h>
 #include <limits>
 #include <iostream>
+#include <fstream>
 #include <time.h>
 #include <stdlib.h>
 using namespace std;
+
+#define THRESHOLD 0.002
 
 struct node
 {
@@ -34,12 +37,29 @@ struct cmp
 
 robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> current, const ObstacleDistanceGrid &distances, pose_xyt_t start, pose_xyt_t goal)
 {
+    // cout << "******* visualize *******" << endl;
     robot_path_t total_path;
     total_path.path.push_back(goal);
     total_path.path_length = total_path.path.size();
+    ofstream myf;
+    myf.open("/home/zhiqich/SLAMLab/a2_code/botlab-f19/data/astar/xy");
     while (cameFrom.find(current) != cameFrom.end())
     {
         current = cameFrom[current];
+        // cout << current.x << endl;
+        // cout << current.y << endl;
+        // pose_xyt_t t1 = distances.coorTopose(current);
+        // Point<int> t2 = distances.poseToCoor(t1);
+        // if (t2.x == current.x && t2.y == current.y)
+        // {
+        //     std::cout << "111" << std::endl;
+        // }
+        // else
+        // {
+        //     std::cout << "000" << std::endl;
+        // }
+        myf << current.x << endl;
+        myf << current.y << endl;
         total_path.path.insert(total_path.path.begin(), distances.coorTopose(current));
         total_path.path_length = total_path.path.size();
     }
@@ -59,16 +79,19 @@ robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> c
     // }
     // total_path.path[total_path.path_length - 1].theta = 0.0f;
     total_path.path[0] = start;
+
+    // cout << "******* ********* *******" << endl;
+
     return total_path;
 }
 
 float heuristic(Point<int> a, Point<int> b)
 {
     srand(time(NULL));
-    // float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-    // return euclideanDist;
-    float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y) + ((double)rand() / (RAND_MAX));
-    return manhattanDist;
+    float euclideanDist = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+    return euclideanDist;
+    // float manhattanDist = abs(a.x - b.x) + abs(a.y - b.y) + ((double)rand() / (RAND_MAX));
+    // return manhattanDist;
 }
 
 bool inContainer(vector<Point<int>> ctn, Point<int> item)
@@ -97,9 +120,13 @@ robot_path_t search_for_path(pose_xyt_t start,
     path.utime = start.utime;
     path.path.push_back(start);
     path.path_length = path.path.size();
-  
+
     Point<int> startGrid = distances.poseToCoor(start);
     Point<int> goalGrid = distances.poseToCoor(goal);
+    if (!distances.isCellInGrid(startGrid.x, startGrid.y))
+    {
+        return path;
+    }
     // cout << "*******" << endl;
     // cout << startGrid.x << ' ' << startGrid.y << endl;
     // cout << goalGrid.x << ' ' << goalGrid.y << endl;
@@ -122,6 +149,11 @@ robot_path_t search_for_path(pose_xyt_t start,
     while (!openSet.empty())
     {
         Point<int> current = openSet.top().coor;
+        if (inOpen[current.x][current.y] == 0)
+        {
+            openSet.pop();
+            continue;
+        }
         if (current == goalGrid)
         {
             return reconstruct_path(cameFrom, current, distances, start, goal);
@@ -148,8 +180,9 @@ robot_path_t search_for_path(pose_xyt_t start,
             neighbor.y = current.y + ny[i];
             if (!distances.isCellInGrid(neighbor.x, neighbor.y))
                 continue;
-            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + 0.2)
+            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + distances.metersPerCell() /*THRESHOLD*/)
             {
+                // cout << "minDis = " << params.minDistanceToObstacle << endl;
                 neighbors.push_back(neighbor);
             }
         }
@@ -165,7 +198,12 @@ robot_path_t search_for_path(pose_xyt_t start,
                 gScore[current] = numeric_limits<float>::infinity();
                 // gScore[current] = 10000.0f;
             }
-            float tentative_gScore = gScore[current] + distance_between_points(neighbor, current);
+            float dis = 0.0f;
+            if (distances(neighbor.x, neighbor.y) < params.maxDistanceWithCost)
+            {
+                dis = pow(params.maxDistanceWithCost - distances(neighbor.x, neighbor.y), params.distanceCostExponent);
+            }
+            float tentative_gScore = gScore[current] + dis; // distance_between_points(neighbor, current);
             if (gScore.find(neighbor) == gScore.end())
 
             {
@@ -178,15 +216,15 @@ robot_path_t search_for_path(pose_xyt_t start,
                 gScore[neighbor] = tentative_gScore;
                 fScore[neighbor] = gScore[neighbor] + heuristic(goalGrid, neighbor);
                 // if (!inContainer(inOpen, neighbor))
-                if (inOpen[neighbor.x][neighbor.y] == 0)
-                {
-                    node pos;
-                    pos.coor = neighbor;
-                    pos.fs = fScore[neighbor];
-                    openSet.push(pos);
-                    // inOpen.push_back(neighbor);
-                    inOpen[neighbor.x][neighbor.y] = 1;
-                }
+                // if (inOpen[neighbor.x][neighbor.y] == 0)
+                // {
+                node pos;
+                pos.coor = neighbor;
+                pos.fs = fScore[neighbor];
+                openSet.push(pos);
+                // inOpen.push_back(neighbor);
+                inOpen[neighbor.x][neighbor.y] = 1;
+                // }
             }
         }
     }

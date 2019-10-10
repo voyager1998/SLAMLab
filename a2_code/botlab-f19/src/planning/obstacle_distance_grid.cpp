@@ -2,6 +2,7 @@
 #include <slam/occupancy_grid.hpp>
 #include <limits>
 #include <iostream>
+#include <fstream>
 #include "KDTree.hpp"
 using namespace std;
 
@@ -13,8 +14,8 @@ ObstacleDistanceGrid::ObstacleDistanceGrid(void)
 Point<int> ObstacleDistanceGrid::poseToCoor(pose_xyt_t pos) const
 {
     Point<int> coor;
-    coor.x = (int)round((pos.x - globalOrigin_.x) / metersPerCell_);
-    coor.y = (int)round((pos.y - globalOrigin_.y) / metersPerCell_);
+    coor.x = static_cast<int>((pos.x - globalOrigin_.x) / metersPerCell_);
+    coor.y = static_cast<int>((pos.y - globalOrigin_.y) / metersPerCell_);
     return coor;
 }
 
@@ -28,12 +29,10 @@ pose_xyt_t ObstacleDistanceGrid::coorTopose(Point<int> current) const
     return pos;
 }
 
-
-
-void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
+void ObstacleDistanceGrid::setDistances(const OccupancyGrid &map)
 {
     resetGrid(map);
-    std::cout << "setting distances" << std::endl;    
+    std::cout << "setting distances" << std::endl;
     ///////////// TODO: Implement an algorithm to mark the distance to the nearest obstacle for every cell in the map.
     // ******* naive *******
     // for (int i = 0; i < width_; i++) {
@@ -52,7 +51,7 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
     //             }
     //             if (!ignore) occupied.push_back(make_pair(i, j));
     //         }
-    //     }   
+    //     }
     // }
     // // for (auto i : occupied) cout << i.first << ' ' << i.second << endl;
     // for (int i = 0; i < width_; i++) {
@@ -65,48 +64,71 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
     //         // cout << dis << endl;
     //         if (cells_[cellIndex(i, j)] != 0)
     //             cells_[cellIndex(i, j)] = dis / 10;
-    //     }    
+    //     }
     // }
     // ******* kd tree *******
     // need to update cells_[cellIndex(i, j)], has map.logOdds
     pointVec points;
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
+    for (int i = 0; i < width_; i++)
+    {
+        for (int j = 0; j < height_; j++)
+        {
             cells_[cellIndex(i, j)] = 999;
-            if (map.logOdds(i, j) > 0) {
+            if (map.logOdds(i, j) >= 0)
+            {
                 bool ignore = false;
-                if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) {
+                cells_[cellIndex(i, j)] = 0;
+                if (map.logOdds(i - 1, j) >= 0 && map.logOdds(i + 1, j) >= 0 && map.logOdds(i, j - 1) >= 0 && map.logOdds(i, j + 1) >= 0)
+                {
                     ignore = true;
-                    cells_[cellIndex(i, j)] = 0;
                 }
-                if (!ignore) {
+                if (!ignore)
+                {
                     point_t pt;
                     pt = {(double)i, (double)j};
                     points.push_back(pt);
                 }
             }
-        }   
-    }
-    if (points.size() > 0) {
-    std::cout << "start KDTree" << std::endl;
-    KDTree tree(points);
-    for (int i = 0; i < width_; i++) {
-        for (int j = 0; j < height_; j++) {
-            if (cells_[cellIndex(i, j)] != 0) {
-                point_t pt;
-                pt = {(double)i, (double)j};
-                auto res = tree.nearest_point(pt);
-                // if (res.size() < 2) {
-                //     // std::cout << "!!!!!" << std::endl;
-                //     cells_[cellIndex(i, j)] = 0;
-                // }
-                // else {
-                cells_[cellIndex(i, j)] = (float)sqrt((i - (int)res[0])*(i - (int)res[0])+(j - (int)res[1])*(j - (int)res[1]))/10.0;
-                // }
-            }
         }
     }
-    std::cout << "end KDTree" << std::endl;
+    if (points.size() > 0)
+    {
+        std::cout << "start KDTree" << std::endl;
+        KDTree tree(points);
+        for (int i = 0; i < width_; i++)
+        {
+            for (int j = 0; j < height_; j++)
+            {
+                if (cells_[cellIndex(i, j)] != 0)
+                {
+                    point_t pt;
+                    pt = {(double)i, (double)j};
+                    auto res = tree.nearest_point(pt);
+                    // if (res.size() < 2) {
+                    //     // std::cout << "!!!!!" << std::endl;
+                    //     cells_[cellIndex(i, j)] = 0;
+                    // }
+                    // else {
+                    cells_[cellIndex(i, j)] = (float)sqrt((i - (int)res[0]) * (i - (int)res[0]) + (j - (int)res[1]) * (j - (int)res[1])) * metersPerCell_;
+                    // }
+                }
+            }
+        }
+        std::cout << "end KDTree" << std::endl;
+        std::cout << "------- disGrid -------" << std::endl;
+        ofstream myfile;
+        myfile.open("/home/zhiqich/SLAMLab/a2_code/botlab-f19/data/astar/disGrid.txt");
+        for (int j = 0; j < height_; j++)
+        {
+            for (int i = 0; i < width_; i++)
+            {
+                myfile << cells_[cellIndex(i, j)] << ' ';
+                // cout << cells_[cellIndex(i, j)] << ' ';
+            }
+            myfile << '\n';
+        }
+        myfile.close();
+        std::cout << "------- ------- -------" << std::endl;
     }
 }
 
