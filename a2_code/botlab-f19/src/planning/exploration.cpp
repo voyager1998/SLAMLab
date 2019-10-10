@@ -135,8 +135,8 @@ void Exploration::copyDataForUpdate(void)
     {
         homePose_ = incomingPose_;
         haveHomePose_ = true;
-        std::cout << "INFO: Exploration: Set home pose:" << homePose_.x << ',' << homePose_.y << ',' 
-            << homePose_.theta << '\n';
+        std::cout << "INFO: Exploration: Set home pose:" << homePose_.x << ", " << homePose_.y << ", "
+                  << homePose_.theta << '\n';
     }
 }
 
@@ -248,35 +248,42 @@ int8_t Exploration::executeExploringMap(bool initialize)
     *           explored more of the map.
     *       -- You will likely be able to see the frontier before actually reaching the end of the path leading to it.
     */
-    if(currentPath_.path.size() == 0)
+    if(currentPath_.path.size() == 0) // initial path planning
     {
         frontiers_ = find_map_frontiers(currentMap_, currentPose_);
-	if(frontiers_.size() > 0)
-	{
-    	    planner_.setMap(currentMap_);
-    	    currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
-	}
-	else
-	    std::cout << "No frontiers left! "  << std::endl;
+        if(frontiers_.size() > 0){
+                planner_.setMap(currentMap_);
+                currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
+                std::vector<pose_xyt_t> tempPath;
+                tempPath.push_back(currentPath_.path[0]);
+                tempPath.push_back(currentPath_.path[1]);
+                currentPath_.path = tempPath;
+                currentPath_.path_length = 2;
+        } else {
+            std::cout << "No frontiers left! " << std::endl;
+        }
     }
-    else
-    {
-    	auto target_pose = --currentPath_.path.end();
-    	float dis = distance_between_points(Point<float>(currentPose_.x, currentPose_.y),
-		   	 Point<float>(target_pose->x, target_pose->y));
-	std::cout << "current distance to target: " << dis << std::endl;
-	if(dis < 0.15)
-   	{
-        	usleep(1000000);	
-		frontiers_ = find_map_frontiers(currentMap_, currentPose_);
-		if(frontiers_.size() > 0)
-		{
-    	    	    planner_.setMap(currentMap_);
-    	    	    currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
-		}
-		else
-	    	    std::cout << "No frontiers left! "  << std::endl;   		
-       	}
+    else{
+    	// auto target_pose = --currentPath_.path.end();
+        auto target_pose = ++currentPath_.path.begin();
+        float dis = distance_between_points(Point<float>(currentPose_.x, currentPose_.y),
+                                            Point<float>(target_pose->x, target_pose->y));
+        std::cout << "current distance to target: " << dis << std::endl;
+        if(dis < 0.15){
+            usleep(1000000);	
+            frontiers_ = find_map_frontiers(currentMap_, currentPose_);
+            if(frontiers_.size() > 0){
+                planner_.setMap(currentMap_);
+                currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
+                std::vector<pose_xyt_t> tempPath;
+                tempPath.push_back(currentPath_.path[0]);
+                tempPath.push_back(currentPath_.path[1]);
+                currentPath_.path = tempPath;
+                currentPath_.path_length = 2;
+            } else {
+                std::cout << "No frontiers left! " << std::endl;
+            }
+        }
     }    
     /////////////////////////////// End student code ///////////////////////////////
     
@@ -335,11 +342,20 @@ int8_t Exploration::executeReturningHome(bool initialize)
     *       (1) dist(currentPose_, targetPose_) < kReachedPositionThreshold  :  reached the home pose
     *       (2) currentPath_.path_length > 1  :  currently following a path to the home pose
     */
-    if(!startReturningHome)
-    {
-	planner_.setMap(currentMap_);
-	currentPath_ = planner_.planPath(currentPose_, homePose_);
-	startReturningHome = true;
+    if(!startReturningHome){
+        planner_.setMap(currentMap_);
+        std::cout << "--------------------------------------------------------" << std::endl;
+        std::cout << "INFO: Return Home: Get home pose:" << homePose_.x << ", " << homePose_.y << ", "
+                  << homePose_.theta << std::endl;
+        // std::cout << currentMap_((int)round((homePose_.x - currentMap_.originInGlobalFrame().x) / currentMap_.metersPerCell()),
+        //                          (int)round((homePose_.y - currentMap_.originInGlobalFrame().y) / currentMap_.metersPerCell()))
+        //           << std::endl;
+        std::cout << "Home distance to obstacle: "
+                  << planner_.obstacleDistances()((int)round((homePose_.x - currentMap_.originInGlobalFrame().x) / currentMap_.metersPerCell()),
+                                                  (int)round((homePose_.y - currentMap_.originInGlobalFrame().y) / currentMap_.metersPerCell()))
+                  << std::endl;
+        currentPath_ = planner_.planPath(currentPose_, homePose_);
+        startReturningHome = true;
     }
     /////////////////////////////// End student code ///////////////////////////////
     

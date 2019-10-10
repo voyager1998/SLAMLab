@@ -9,7 +9,7 @@
 #include <time.h>
 #include <stdlib.h>
 using namespace std;
-#define THRESHOLD 0.15
+#define THRESHOLD 0
 #define DENSITY 4
 
 struct node
@@ -110,7 +110,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     ////////////////// TODO: Implement your A* search here //////////////////////////
 
     // std::cout <<  "#################################" << std::endl;
-    std::cout << start.x << " " << start.y << std::endl;
+    // std::cout << start.x << " " << start.y << std::endl;
     robot_path_t path;
     path.utime = start.utime;
     path.path.push_back(start);
@@ -141,11 +141,15 @@ robot_path_t search_for_path(pose_xyt_t start,
     pos.fs = fScore[startGrid];
     openSet.push(pos);
     // inOpen.push_back(startGrid);
-    std::cout << startGrid.x << " " << startGrid.y << std::endl;
+    // std::cout << startGrid.x << " " << startGrid.y << std::endl;
     inOpen[startGrid.x][startGrid.y] = 1;
     while (!openSet.empty())
     {
         Point<int> current = openSet.top().coor;
+        if (closedSet[current.x][current.y] == 1) {
+            openSet.pop();
+            continue;
+        }
         if (abs(current.x - goalGrid.x) < DENSITY && abs(current.y - goalGrid.y) < DENSITY) {
             return reconstruct_path(cameFrom, current, distances, start, goal);
         }
@@ -162,7 +166,7 @@ robot_path_t search_for_path(pose_xyt_t start,
         //     }
         // }
         // inOpen.erase(inOpen.begin() + idx);
-        inOpen[current.x][current.y] = 0;
+        // inOpen[current.x][current.y] = 0;
         vector<Point<int>> neighbors;
         for (size_t i = 0; i < 8; i++)
         {
@@ -189,7 +193,6 @@ robot_path_t search_for_path(pose_xyt_t start,
             }
             float tentative_gScore = gScore[current] + distance_between_points(neighbor, current);
             if (gScore.find(neighbor) == gScore.end())
-
             {
                 gScore[neighbor] = numeric_limits<float>::infinity();
                 // gScore[neighbor] = 10000.0f;
@@ -200,15 +203,15 @@ robot_path_t search_for_path(pose_xyt_t start,
                 gScore[neighbor] = tentative_gScore;
                 fScore[neighbor] = gScore[neighbor] + heuristic(goalGrid, neighbor);
                 // if (!inContainer(inOpen, neighbor))
-                if (inOpen[neighbor.x][neighbor.y] == 0)
-                {
+                // if (inOpen[neighbor.x][neighbor.y] == 0)
+                // {
                     node pos;
                     pos.coor = neighbor;
                     pos.fs = fScore[neighbor];
                     openSet.push(pos);
                     // inOpen.push_back(neighbor);
                     inOpen[neighbor.x][neighbor.y] = 1;
-                }
+                // }
             }
         }
     }

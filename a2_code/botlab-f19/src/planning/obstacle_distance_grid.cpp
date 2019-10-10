@@ -33,6 +33,7 @@ pose_xyt_t ObstacleDistanceGrid::coorTopose(Point<int> current) const
 void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
 {
     resetGrid(map);
+    std::cout << "Map, meters per cell: " << map.metersPerCell() << std::endl;
 #ifndef USEKDTREE
     ///////////// TODO: Implement an algorithm to mark the distance to the nearest obstacle for every cell in the map.
     for (int i = 0; i < width_; i++) {
@@ -68,16 +69,19 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
     }
 #else
     pointVec points;
-    std::cout << "Begin to go through all cells" << std::endl;
+    std::cout << "Begin to go through all cells to construct Distance Grid." << std::endl;
     for (int j = 0; j < height_; j++) {
         for (int i = 0; i < width_; i++) {
             cells_[cellIndex(i, j)] = 999;
             if (map.logOdds(i, j) > 0) {
+                cells_[cellIndex(i, j)] = 0;
                 bool ignore = false;
                 if (map.logOdds(i - 1, j) > 0 && map.logOdds(i + 1, j) > 0 && map.logOdds(i, j - 1) > 0 && map.logOdds(i, j + 1) > 0) {
                     ignore = true;
-                    cells_[cellIndex(i, j)] = 0;
+                    // cells_[cellIndex(i, j)] = 0;
                 }
+                // if(map.logOdds(i, j) == 0)
+                //     ignore = true;
                 if (!ignore) {
                     point_t pt;
                     pt = {(double)i, (double)j};
@@ -92,7 +96,7 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
         KDTree tree(points);
         for (int j = 0; j < height_; j++) {
             for (int i = 0; i < width_; i++) {
-                if (cells_[cellIndex(i, j)] != 0) {
+                if (cells_[cellIndex(i, j)] != 0 /*&& map.logOdds(i, j) < 0*/) {
                     point_t pt;
                     pt = {(double)i, (double)j};
                     auto res = tree.nearest_point(pt);
@@ -101,7 +105,7 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
                     //     cells_[cellIndex(i, j)] = 0;
                     // }
                     // else {
-                    cells_[cellIndex(i, j)] = (float)sqrt((i - (int)res[0]) * (i - (int)res[0]) + (j - (int)res[1]) * (j - (int)res[1])) / 10.0;
+                    cells_[cellIndex(i, j)] = (float)sqrt((i - (int)res[0]) * (i - (int)res[0]) + (j - (int)res[1]) * (j - (int)res[1])) * map.metersPerCell();  // / 10.0;
                     // }
                 }
             }

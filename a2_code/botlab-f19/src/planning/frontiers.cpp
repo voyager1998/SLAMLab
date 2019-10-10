@@ -101,39 +101,66 @@ robot_path_t plan_path_to_frontier(const std::vector<frontier_t>& frontiers,
     */
     robot_path_t emptyPath;
     bool ispathfound = false;
-    float thres_dis_to_frontier = 0.1;
-    std::vector<float> xs = {0.00, 0.00, thres_dis_to_frontier, -thres_dis_to_frontier};
-    std::vector<float> ys = {thres_dis_to_frontier, -thres_dis_to_frontier, 0.00, 0.00};
+    float thres_dis_to_frontier = 0.05;
+    std::vector<float> xs = {thres_dis_to_frontier, -thres_dis_to_frontier, 0.0, 0.0, thres_dis_to_frontier, thres_dis_to_frontier, -thres_dis_to_frontier, -thres_dis_to_frontier};
+    std::vector<float> ys = {0.0, 0.0, thres_dis_to_frontier, -thres_dis_to_frontier, thres_dis_to_frontier, -thres_dis_to_frontier, thres_dis_to_frontier, -thres_dis_to_frontier};
+
+    // for (auto frontier : frontiers) {
+    //     // for (auto cell : frontier.cells) {
+    //     //     for(int i = 0; i < 4; ++i)
+    //     //     {
+    //     // 	    pose_xyt_t goalpos;
+    //     //     	goalpos.x = cell.x + xs[i];
+    //     //     	goalpos.y = cell.y + ys[i];
+    //     //     	emptyPath = planner.planPath(robotPose, goalpos);
+    //     //     	if (emptyPath.path_length > 1){
+    //     //             ispathfound = true;
+    //     //             break;
+    //     //         }
+    //     //     }
+    //     // if(ispathfound) break;
+    //     // }
+    //     auto cell = frontier.cells[frontier.cells.size() / 2];
+    //     for(int i = 0; i < 4; ++i)
+    //     {
+    //         pose_xyt_t goalpos;
+    //         goalpos.x = cell.x + xs[i];
+    //         goalpos.y = cell.y + ys[i];
+    //         emptyPath = planner.planPath(robotPose, goalpos);
+    //         if (emptyPath.path_length > 1){
+    //             ispathfound = true;
+    //             break;
+    //         }
+    //     }
+    //     if (ispathfound) break;
+    // }
+
+    float min_dis_to_frontier = 1000.0;
+    Point<float> destination;
     for (auto frontier : frontiers) {
-        // for (auto cell : frontier.cells) {
-        //     for(int i = 0; i < 4; ++i)
-        //     {
-	    // 	    pose_xyt_t goalpos;
-        //     	goalpos.x = cell.x + xs[i];
-        //     	goalpos.y = cell.y + ys[i];
-        //     	emptyPath = planner.planPath(robotPose, goalpos);
-        //     	if (emptyPath.path_length > 1){
-        //             ispathfound = true;
-        //             break;
-        //         }
-        //     }
-	    // if(ispathfound) break;
-        // }
-        auto cell = frontier.cells[frontier.cells.size() / 2];
-        for(int i = 0; i < 4; ++i)
+        auto midCell = frontier.cells[frontier.cells.size() / 2];
+        float dis = distance_between_points(Point<float>(robotPose.x, robotPose.y), Point<float>(midCell.x, midCell.y));
+        if (dis < min_dis_to_frontier) {
+            min_dis_to_frontier = dis;
+            destination = midCell;
+        }
+    }
+    int count = 1;
+    while (!ispathfound) {
+        for(int i = 0; i < 8; ++i)
         {
             pose_xyt_t goalpos;
-            goalpos.x = cell.x + xs[i];
-            goalpos.y = cell.y + ys[i];
+            goalpos.x = destination.x + count * xs[i];
+            goalpos.y = destination.y + count * ys[i];
             emptyPath = planner.planPath(robotPose, goalpos);
             if (emptyPath.path_length > 1){
                 ispathfound = true;
                 break;
             }
         }
-        if (ispathfound) break;
+        count++;
     }
-    std::cout << "ispatfound? " << ispathfound << std::endl;
+    std::cout << "Is path found? " << ispathfound << std::endl;
     return emptyPath;
 }
 
