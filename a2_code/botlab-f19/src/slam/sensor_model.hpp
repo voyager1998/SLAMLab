@@ -40,6 +40,8 @@ public:
 
     double Gaussianlikelihood(const particle_t& particle, const lidar_t& scan, const OccupancyGrid& map);
 
+    double Trilikelihood(const particle_t& particle, const lidar_t& scan, const OccupancyGrid& map);
+
 private:
     
     // Add any private members for your SensorModel

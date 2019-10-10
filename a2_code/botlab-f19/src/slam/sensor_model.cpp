@@ -8,8 +8,12 @@
 #define LIDARLONGER -12
 #define LIDARSHORTER -8
 
-#define SIGMA 2
 #define RANGE 0.3
+#define SIGMA 2
+
+#define TRI_H 40.0
+#define TRI_WL 2.0
+#define TRI_WS (TRI_WL*2.0)
 
 SensorModel::SensorModel(void) {
     // Handle any initialization needed for your sensor model
@@ -77,5 +81,40 @@ double SensorModel::Gaussianlikelihood(const particle_t& particle, const lidar_t
         }
     }
 
+    return logP;
+}
+
+double SensorModel::Trilikelihood(const particle_t& particle, const lidar_t& scan, const OccupancyGrid& map) {
+    double logP = 0.0;
+    MovingLaserScan movingScan(scan, particle.parent_pose, particle.pose);
+    for (auto adj_ray_iter = movingScan.begin(); adj_ray_iter < movingScan.end(); adj_ray_iter++) {
+        auto ray = *adj_ray_iter;
+        ray.range += RANGE;
+        coordinate end_pt = coordinate_convert_.get_end_point_coordinate(ray, map);
+        ray_coordinates ray_pts = coordinate_convert_.get_ray_coordinates(ray, map);
+
+        int num_cells = ray_pts.size();
+        bool findwall = false;
+        bool isPassEndPt = false;
+        for (int i = 0; i < num_cells; i++) {
+            coordinate temp = ray_pts[i];
+            if (temp.x == end_pt.x && temp.y == end_pt.y) {
+                isPassEndPt = true;
+            }
+            if (map(temp.x, temp.y) > 0) {
+                findwall = true;
+                double distance_to_endpt = dist(temp, end_pt, map.metersPerCell());
+                if(isPassEndPt){
+                    logP += TRI_H - distance_to_endpt * TRI_H / TRI_WS;
+                }else{
+                    logP += TRI_H - distance_to_endpt * TRI_H / TRI_WL;
+                }
+                break;
+            }
+        }
+        if (findwall == false) {  //lidar is shorter
+            logP += TRI_H - RANGE * TRI_H / TRI_WS;
+        }
+    }
     return logP;
 }

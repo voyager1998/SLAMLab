@@ -9,6 +9,7 @@
 #define ITERATIONS 5
 #define STARTITER 3
 // #define USEGAUSSIAN
+#define USETRI
 // #define USEITERATIVE
 // #define RANDOMINIT
 using namespace std;
@@ -149,8 +150,13 @@ std::vector<particle_t> ParticleFilter::computeNormalizedPosterior(const std::ve
     std::vector<particle_t> posterior;
     vector<double> logPs;
     for (auto i : proposal) {
+#if defined(USEGAUSSIAN) || defined(USETRI)
 #ifdef USEGAUSSIAN
         double logP = sensorModel_.Gaussianlikelihood(i, laser, map);
+#endif
+#ifdef USETRI
+        double logP = sensorModel_.Trilikelihood(i, laser, map);
+#endif
 #else
         double logP = sensorModel_.likelihood(i, laser, map);
 #endif
@@ -272,8 +278,13 @@ std::vector<particle_t> ParticleFilter::PosteriorGenerater(const lidar_t& laser,
     std::vector<particle_t> posterior;
     vector<double> logPs;
     for (auto i : proposal) {
+#if defined(USEGAUSSIAN) || defined(USETRI)
 #ifdef USEGAUSSIAN
         double logP = sensorModel_.Gaussianlikelihood(i, laser, map);
+#endif
+#ifdef USETRI
+        double logP = sensorModel_.Trilikelihood(i, laser, map);
+#endif
 #else
         double logP = sensorModel_.likelihood(i, laser, map);
 #endif
