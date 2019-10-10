@@ -368,8 +368,9 @@ int8_t Exploration::executeReturningHome(bool initialize)
     double distToHome = distance_between_points(Point<float>(homePose_.x, homePose_.y), 
                                                 Point<float>(currentPose_.x, currentPose_.y));
     // If we're within the threshold of home, then we're done.
-    if(distToHome <= kReachedPositionThreshold)
-    {
+    std::cout << "Distance to Home: " << distToHome << std::endl;
+    if (distToHome <= kReachedPositionThreshold) {
+        std::cout << "Returned Home!!!" << std::endl;
         status.status = exploration_status_t::STATUS_COMPLETE;
     }
     // Otherwise, if there's a path, then keep following it
@@ -389,8 +390,9 @@ int8_t Exploration::executeReturningHome(bool initialize)
     if(status.status == exploration_status_t::STATUS_IN_PROGRESS)
     {
         return exploration_status_t::STATE_RETURNING_HOME;
-    }
-    else // if(status.status == exploration_status_t::STATUS_FAILED)
+    } else if (status.status == exploration_status_t::STATUS_COMPLETE) {
+        return exploration_status_t::STATE_COMPLETED_EXPLORATION;
+    } else  // if(status.status == exploration_status_t::STATUS_FAILED)
     {
         return exploration_status_t::STATE_FAILED_EXPLORATION;
     }
