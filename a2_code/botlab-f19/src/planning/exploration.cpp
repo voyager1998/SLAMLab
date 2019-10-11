@@ -355,6 +355,26 @@ int8_t Exploration::executeReturningHome(bool initialize)
                                                   (int)round((homePose_.y - currentMap_.originInGlobalFrame().y) / currentMap_.metersPerCell()))
                   << std::endl;
         currentPath_ = planner_.planPath(currentPose_, homePose_);
+        bool ispathfound = currentPath_.path_length != 1;
+        float thres_dis_to_frontier = 0.05;
+        std::vector<float> xs = {thres_dis_to_frontier, -thres_dis_to_frontier, 0.0, 0.0, thres_dis_to_frontier, thres_dis_to_frontier, -thres_dis_to_frontier, -thres_dis_to_frontier};
+        std::vector<float> ys = {0.0, 0.0, thres_dis_to_frontier, -thres_dis_to_frontier, thres_dis_to_frontier, -thres_dis_to_frontier, thres_dis_to_frontier, -thres_dis_to_frontier};
+        if (!ispathfound) {
+            int count = 1;
+            while (!ispathfound) {
+                for (int i = 0; i < 8; ++i) {
+                    pose_xyt_t goalpos;
+                    goalpos.x = homePose_.x + count * xs[i];
+                    goalpos.y = homePose_.y + count * ys[i];
+                    currentPath_ = planner_.planPath(currentPose_, goalpos);
+                    if (currentPath_.path_length > 1) {
+                        ispathfound = true;
+                        break;
+                    }
+                }
+                count++;
+            }
+        }
         startReturningHome = true;
     }
     /////////////////////////////// End student code ///////////////////////////////
