@@ -123,7 +123,7 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid &map)
                     //     cells_[cellIndex(i, j)] = 0;
                     // }
                     // else {
-                    cells_[cellIndex(i, j)] = (float)sqrt((i - (int)res[0]) * (i - (int)res[0]) + (j - (int)res[1]) * (j - (int)res[1])) * map.metersPerCell(); // / 10.0;
+                    cells_[cellIndex(i, j)] = (float)sqrt((i - (int)res[0]) * (i - (int)res[0]) + (j - (int)res[1]) * (j - (int)res[1])) * metersPerCell_; // / 10.0;
                     // }
                 }
             }

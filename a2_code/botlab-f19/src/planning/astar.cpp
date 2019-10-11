@@ -10,7 +10,7 @@
 #include <stdlib.h>
 using namespace std;
 #define THRESHOLD 0
-#define DENSITY 4
+#define DENSITY 1
 
 struct node
 {
@@ -190,7 +190,7 @@ robot_path_t search_for_path(pose_xyt_t start,
             neighbor.y = current.y + ny[i];
             if (!distances.isCellInGrid(neighbor.x, neighbor.y))
                 continue;
-            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + distances.metersPerCell() + THRESHOLD)
+            if (distances(neighbor.x, neighbor.y) > params.minDistanceToObstacle + distances.metersPerCell() /*+ THRESHOLD*/)
             {
                 neighbors.push_back(neighbor);
             }
