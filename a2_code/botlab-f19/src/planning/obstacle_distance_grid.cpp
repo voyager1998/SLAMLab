@@ -3,7 +3,7 @@
 #include <limits>
 #include <iostream>
 #include <fstream>
-#include "KDTree.hpp"
+#include <planning/KDTree.hpp>
 using namespace std;
 
 ObstacleDistanceGrid::ObstacleDistanceGrid(void)
