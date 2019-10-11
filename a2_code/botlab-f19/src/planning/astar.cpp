@@ -34,6 +34,22 @@ struct cmp
     }
 };
 
+robot_path_t smoothPath(robot_path_t inputPath, pose_xyt_t goal) {
+    robot_path_t new_path;
+    new_path.path.push_back(inputPath.path[0]);
+    if (inputPath.path_length > 2) {
+        for (int i = 1; i < inputPath.path_length - 1; i++) {
+            if (abs(inputPath.path[i].theta - inputPath.path[i - 1].theta) > 0.1) {
+                new_path.path.push_back(inputPath.path[i]);
+            }
+        }
+        new_path.path.push_back(goal);
+        new_path.path_length = new_path.path.size();
+        return new_path;
+    } else
+        return inputPath;
+}
+
 robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> current, const ObstacleDistanceGrid &distances, pose_xyt_t start, pose_xyt_t goal)
 {
     robot_path_t total_path;
@@ -71,23 +87,23 @@ robot_path_t reconstruct_path(map<Point<int>, Point<int>> cameFrom, Point<int> c
     }
     total_path.path[total_path.path_length - 1].theta = 0.0f;
 
-    robot_path_t new_path;
-    new_path.path.push_back(total_path.path[0]);
-    if (total_path.path_length > 2)
-    {
-        for (int i = 1; i < total_path.path_length - 1; i++)
-        {
-            if (abs(total_path.path[i].theta - total_path.path[i - 1].theta) > 0.1)
-            {
-                new_path.path.push_back(total_path.path[i]);
-            }
-        }
-        new_path.path.push_back(goal);
-        new_path.path_length = new_path.path.size();
-        return new_path;
-    }
-    else
-        return total_path;
+    // robot_path_t new_path;
+    // new_path.path.push_back(total_path.path[0]);
+    // if (total_path.path_length > 2)
+    // {
+    //     for (int i = 1; i < total_path.path_length - 1; i++)
+    //     {
+    //         if (abs(total_path.path[i].theta - total_path.path[i - 1].theta) > 0.1)
+    //         {
+    //             new_path.path.push_back(total_path.path[i]);
+    //         }
+    //     }
+    //     new_path.path.push_back(goal);
+    //     new_path.path_length = new_path.path.size();
+    //     return new_path;
+    // }
+    // else
+    return total_path;
 }
 
 float heuristic(Point<int> a, Point<int> b)
@@ -159,7 +175,7 @@ robot_path_t search_for_path(pose_xyt_t start,
     while (!openSet.empty())
     {
         Point<int> current = openSet.top().coor;
-        if (inOpen[current.x][current.y] == 0)
+        if (closedSet[current.x][current.y] == 1)
         {
             openSet.pop();
             continue;
@@ -181,7 +197,7 @@ robot_path_t search_for_path(pose_xyt_t start,
         //     }
         // }
         // inOpen.erase(inOpen.begin() + idx);
-        inOpen[current.x][current.y] = 0;
+        // inOpen[current.x][current.y] = 0;
         vector<Point<int>> neighbors;
         for (size_t i = 0; i < 8; i++)
         {

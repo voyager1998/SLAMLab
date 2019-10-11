@@ -39,4 +39,6 @@ robot_path_t search_for_path(pose_xyt_t start,
                              const ObstacleDistanceGrid& distances,
                              const SearchParams& params);
 
-#endif // PLANNING_ASTAR_HPP
+robot_path_t smoothPath(robot_path_t inputPath, pose_xyt_t goal);
+
+#endif  // PLANNING_ASTAR_HPP

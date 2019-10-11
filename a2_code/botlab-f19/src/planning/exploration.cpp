@@ -10,6 +10,7 @@
 #include <queue>
 #include <unistd.h>
 #include <cassert>
+#define STEPS 10
 
 const float kReachedPositionThreshold = 0.05f;  // must get within this distance of a position for it to be explored
 
@@ -254,18 +255,19 @@ int8_t Exploration::executeExploringMap(bool initialize)
         if(frontiers_.size() > 0){
                 planner_.setMap(currentMap_);
                 currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
-                std::vector<pose_xyt_t> tempPath;
-                tempPath.push_back(currentPath_.path[0]);
-                tempPath.push_back(currentPath_.path[1]);
-                currentPath_.path = tempPath;
-                currentPath_.path_length = 2;
+                // std::vector<pose_xyt_t> tempPath;
+                robot_path_t tempPath;
+                for (int i = 0; i < std::min(STEPS, currentPath_.path_length); i++) {
+                    tempPath.path.push_back(currentPath_.path[i]);
+                }
+                currentPath_ = smoothPath(tempPath, *currentPath_.path.end());
         } else {
             std::cout << "No frontiers left! " << std::endl;
         }
     }
     else{
     	// auto target_pose = --currentPath_.path.end();
-        auto target_pose = ++currentPath_.path.begin();
+        auto target_pose = currentPath_.path.begin() + std::min(STEPS, currentPath_.path_length) - 1;
         float dis = distance_between_points(Point<float>(currentPose_.x, currentPose_.y),
                                             Point<float>(target_pose->x, target_pose->y));
         std::cout << "current distance to target: " << dis << std::endl;
@@ -275,11 +277,11 @@ int8_t Exploration::executeExploringMap(bool initialize)
             if(frontiers_.size() > 0){
                 planner_.setMap(currentMap_);
                 currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
-                std::vector<pose_xyt_t> tempPath;
-                tempPath.push_back(currentPath_.path[0]);
-                tempPath.push_back(currentPath_.path[1]);
-                currentPath_.path = tempPath;
-                currentPath_.path_length = 2;
+                robot_path_t tempPath;
+                for (int i = 0; i < std::min(STEPS, currentPath_.path_length); i++) {
+                    tempPath.path.push_back(currentPath_.path[i]);
+                }
+                currentPath_ = smoothPath(tempPath, *currentPath_.path.end());
             } else {
                 std::cout << "No frontiers left! " << std::endl;
             }
