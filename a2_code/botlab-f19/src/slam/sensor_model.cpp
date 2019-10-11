@@ -3,6 +3,7 @@
 #include <slam/moving_laser_scan.hpp>
 #include <slam/occupancy_grid.hpp>
 #include <slam/sensor_model.hpp>
+#include <math.h>
 
 #define LIDARCORRECT -4
 #define LIDARLONGER -12
@@ -12,7 +13,7 @@
 #define SIGMA 2
 
 #define TRI_H 40.0
-#define TRI_WL 2.0
+#define TRI_WL 0.5
 #define TRI_WS (TRI_WL*2.0)
 
 SensorModel::SensorModel(void) {
@@ -59,8 +60,8 @@ double SensorModel::Gaussianlikelihood(const particle_t& particle, const lidar_t
     MovingLaserScan movingScan(scan, particle.parent_pose, particle.pose);
     for (auto adj_ray_iter = movingScan.begin(); adj_ray_iter < movingScan.end(); adj_ray_iter++) {
         auto ray = *adj_ray_iter;
-        ray.range += RANGE;
         coordinate end_pt = coordinate_convert_.get_end_point_coordinate(ray, map);
+        ray.range += RANGE;
         ray_coordinates ray_pts = coordinate_convert_.get_ray_coordinates(ray, map);
 
         int num_cells = ray_pts.size();
@@ -89,8 +90,8 @@ double SensorModel::Trilikelihood(const particle_t& particle, const lidar_t& sca
     MovingLaserScan movingScan(scan, particle.parent_pose, particle.pose);
     for (auto adj_ray_iter = movingScan.begin(); adj_ray_iter < movingScan.end(); adj_ray_iter++) {
         auto ray = *adj_ray_iter;
-        ray.range += RANGE;
         coordinate end_pt = coordinate_convert_.get_end_point_coordinate(ray, map);
+        ray.range += RANGE;
         ray_coordinates ray_pts = coordinate_convert_.get_ray_coordinates(ray, map);
 
         int num_cells = ray_pts.size();
@@ -105,9 +106,9 @@ double SensorModel::Trilikelihood(const particle_t& particle, const lidar_t& sca
                 findwall = true;
                 double distance_to_endpt = dist(temp, end_pt, map.metersPerCell());
                 if(isPassEndPt){
-                    logP += TRI_H - distance_to_endpt * TRI_H / TRI_WS;
+                    logP += std::max(TRI_H - distance_to_endpt * TRI_H / TRI_WS, 0.0);
                 }else{
-                    logP += TRI_H - distance_to_endpt * TRI_H / TRI_WL;
+                    logP += std::max(TRI_H - distance_to_endpt * TRI_H / TRI_WL, 0.0);
                 }
                 break;
             }
