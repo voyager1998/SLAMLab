@@ -377,6 +377,17 @@ int8_t Exploration::executeReturningHome(bool initialize)
         }
         startReturningHome = true;
     }
+
+    auto target_pose = --currentPath_.path.end();
+    // auto target_pose = ++currentPath_.path.begin();
+    float dis = distance_between_points(Point<float>(currentPose_.x, currentPose_.y),
+                                        Point<float>(target_pose->x, target_pose->y));
+    double distToHome = distance_between_points(Point<float>(homePose_.x, homePose_.y),
+                                                Point<float>(currentPose_.x, currentPose_.y));
+    if (dis <= kReachedPositionThreshold && distToHome > kReachedPositionThreshold) {
+        startReturningHome = false;
+    }
+
     /////////////////////////////// End student code ///////////////////////////////
     
     /////////////////////////   Create the status message    //////////////////////////
@@ -385,8 +396,6 @@ int8_t Exploration::executeReturningHome(bool initialize)
     status.team_number = teamNumber_;
     status.state = exploration_status_t::STATE_RETURNING_HOME;
     
-    double distToHome = distance_between_points(Point<float>(homePose_.x, homePose_.y), 
-                                                Point<float>(currentPose_.x, currentPose_.y));
     // If we're within the threshold of home, then we're done.
     std::cout << "Distance to Home: " << distToHome << std::endl;
     if (distToHome <= kReachedPositionThreshold) {
