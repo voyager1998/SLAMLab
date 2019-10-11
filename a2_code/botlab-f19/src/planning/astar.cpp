@@ -181,7 +181,7 @@ robot_path_t search_for_path(pose_xyt_t start,
         //     }
         // }
         // inOpen.erase(inOpen.begin() + idx);
-        // inOpen[current.x][current.y] = 0;
+        inOpen[current.x][current.y] = 0;
         vector<Point<int>> neighbors;
         for (size_t i = 0; i < 8; i++)
         {

@@ -79,9 +79,9 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid &map)
 #else
     pointVec points;
     std::cout << "Begin to go through all cells to construct Distance Grid." << std::endl;
-    for (int j = 0; j < height_; j++)
+    for (int i = 0; i < width_; i++)
     {
-        for (int i = 0; i < width_; i++)
+        for (int j = 0; j < height_; j++)
         {
             cells_[cellIndex(i, j)] = 999;
             if (map.logOdds(i, j) >= 0)
@@ -109,9 +109,9 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid &map)
     {
         std::cout << "start KDTree" << std::endl;
         KDTree tree(points);
-        for (int j = 0; j < height_; j++)
+        for (int i = 0; i < width_; i++)
         {
-            for (int i = 0; i < width_; i++)
+            for (int j = 0; j < height_; j++)
             {
                 if (cells_[cellIndex(i, j)] != 0 /*&& map.logOdds(i, j) < 0*/)
                 {
