@@ -255,31 +255,41 @@ int8_t Exploration::executeExploringMap(bool initialize)
                 planner_.setMap(currentMap_);
                 currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
                 std::vector<pose_xyt_t> tempPath;
-                tempPath.push_back(currentPath_.path[0]);
-                tempPath.push_back(currentPath_.path[1]);
+                int steps = std::min(4, currentPath_.path_length);
+                for (int i = 0; i < steps;i++){
+                    tempPath.push_back(currentPath_.path[i]);
+                }
+                // tempPath.push_back(currentPath_.path[1]);
+                // tempPath.push_back(currentPath_.path[2]);
+                // tempPath.push_back(currentPath_.path[3]);
                 currentPath_.path = tempPath;
-                currentPath_.path_length = 2;
+                currentPath_.path_length = steps;
         } else {
             std::cout << "No frontiers left! " << std::endl;
         }
     }
     else{
     	// auto target_pose = --currentPath_.path.end();
-        auto target_pose = ++currentPath_.path.begin();
+        auto target_pose = currentPath_.path.begin()+3;
         float dis = distance_between_points(Point<float>(currentPose_.x, currentPose_.y),
                                             Point<float>(target_pose->x, target_pose->y));
         std::cout << "current distance to target: " << dis << std::endl;
-        if(dis < 0.15){
+        if(dis < 0.10){
             usleep(1000000);	
             frontiers_ = find_map_frontiers(currentMap_, currentPose_);
             if(frontiers_.size() > 0){
                 planner_.setMap(currentMap_);
                 currentPath_ = plan_path_to_frontier(frontiers_, currentPose_, currentMap_, planner_);
                 std::vector<pose_xyt_t> tempPath;
-                tempPath.push_back(currentPath_.path[0]);
-                tempPath.push_back(currentPath_.path[1]);
+                int steps = std::min(4, currentPath_.path_length);
+                for (int i = 0; i < steps; i++) {
+                    tempPath.push_back(currentPath_.path[i]);
+                }
+                // tempPath.push_back(currentPath_.path[1]);
+                // tempPath.push_back(currentPath_.path[2]);
+                // tempPath.push_back(currentPath_.path[3]);
                 currentPath_.path = tempPath;
-                currentPath_.path_length = 2;
+                currentPath_.path_length = steps;
             } else {
                 std::cout << "No frontiers left! " << std::endl;
             }
@@ -369,6 +379,16 @@ int8_t Exploration::executeReturningHome(bool initialize)
                     currentPath_ = planner_.planPath(currentPose_, goalpos);
                     if (currentPath_.path_length > 1) {
                         ispathfound = true;
+                        std::vector<pose_xyt_t> tempPath;
+                        int steps = std::min(4, currentPath_.path_length);
+                        for (int i = 0; i < steps; i++) {
+                            tempPath.push_back(currentPath_.path[i]);
+                        }
+                        // tempPath.push_back(currentPath_.path[1]);
+                        // tempPath.push_back(currentPath_.path[2]);
+                        // tempPath.push_back(currentPath_.path[3]);
+                        currentPath_.path = tempPath;
+                        currentPath_.path_length = steps;
                         break;
                     }
                 }

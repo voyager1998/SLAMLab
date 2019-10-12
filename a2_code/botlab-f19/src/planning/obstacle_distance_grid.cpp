@@ -117,6 +117,7 @@ void ObstacleDistanceGrid::setDistances(const OccupancyGrid& map)
 
 bool ObstacleDistanceGrid::isCellInGrid(int x, int y) const
 {
+    
     return (x >= 0) && (x < width_) && (y >= 0) && (y < height_);
 }
 

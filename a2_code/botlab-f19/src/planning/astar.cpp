@@ -9,8 +9,8 @@
 #include <time.h>
 #include <stdlib.h>
 using namespace std;
-#define THRESHOLD 0
-#define DENSITY 4
+#define THRESHOLD 0.025
+#define DENSITY 1
 
 struct node
 {
@@ -215,5 +215,6 @@ robot_path_t search_for_path(pose_xyt_t start,
             }
         }
     }
+
     return path;
 }
